@@ -10,6 +10,7 @@ import {
 } from "@/data/catalog";
 import ProductCard from "./ProductCard";
 import ClearanceSection from "./ClearanceSection";
+import CategoryMenu from "./CategoryMenu";
 
 export default function CatalogClient() {
   const router = useRouter();
