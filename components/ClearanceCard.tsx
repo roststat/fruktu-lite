@@ -22,8 +22,8 @@ export default function ClearanceCard({ product }: { product: Product }) {
   const itemPrice = Math.round(product.clearance.price * quantity);
 
   return (
-    <div className="flex flex-col rounded-[16px] border border-green-600/20 bg-card overflow-hidden">
-      <Link href={`/product/${product.id}`} className="relative block aspect-square bg-white">
+    <div className="flex flex-col">
+      <Link href={`/product/${product.id}`} className="relative block aspect-square rounded-[16px] bg-white overflow-hidden">
         <div className="flex h-full items-center justify-center text-7xl sm:text-8xl">
           {product.icon}
         </div>
