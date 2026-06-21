@@ -20,9 +20,9 @@ export default function ClearanceSection() {
           Сейчас таких товаров нет — но они могут появиться в любой момент 🍃
         </p>
       ) : (
-        <div className="flex flex-nowrap gap-3 overflow-x-auto pb-1">
+        <div className="flex flex-nowrap gap-4 overflow-x-auto pb-1">
           {items.map((product) => (
-            <div key={product.id} className="w-44 shrink-0">
+            <div key={product.id} className="w-56 shrink-0">
               <ClearanceCard product={product} />
             </div>
           ))}
