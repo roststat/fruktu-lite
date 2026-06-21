@@ -33,7 +33,7 @@ export default function Header() {
             <span className="text-2xl">🧺</span>
             <span className="flex flex-col leading-tight">
               <span className="text-lg font-extrabold text-primary-dark">Схожу на рынок</span>
-              <span className="flex items-center gap-1 rounded-[10px] bg-accent/15 px-2 py-0.5 text-[11px] font-bold text-accent">
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-accent">
                 <span aria-hidden>🏅</span>
                 Честный продавец
               </span>
