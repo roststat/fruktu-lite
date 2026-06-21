@@ -5,6 +5,7 @@ import Link from "next/link";
 import SearchBar from "./SearchBar";
 import CategoryMenu from "./CategoryMenu";
 import DeliveryZoneModal from "./DeliveryZoneModal";
+import LogoIcon from "./LogoIcon";
 
 export default function Header() {
   const [zoneOpen, setZoneOpen] = useState(false);
@@ -30,7 +31,7 @@ export default function Header() {
       <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <Link href="/catalog" className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl">🧺</span>
+            <LogoIcon size={40} />
             <span className="flex flex-col leading-tight">
               <span className="text-lg font-extrabold text-primary-dark">Схожу на рынок</span>
               <span className="flex items-center gap-1 text-[11px] font-semibold text-accent">
