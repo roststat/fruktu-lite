@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { categories } from "@/data/catalog";
 
-export default function CategoryMenu() {
+export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -26,13 +26,17 @@ export default function CategoryMenu() {
   };
 
   return (
-    <div ref={rootRef} className="relative shrink-0">
+    <div ref={rootRef} className={`relative ${label ? "w-full" : "shrink-0"}`}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-[10px] bg-primary px-4 py-3 text-base font-semibold text-white"
+        className={`flex items-center gap-2 rounded-[10px] bg-primary px-4 py-3 text-base font-semibold text-white${label ? " w-full" : ""}`}
       >
-        <span aria-hidden>☰</span>
-        <span className="hidden sm:inline">Каталог</span>
+        {label ?? (
+          <>
+            <span aria-hidden>☰</span>
+            <span className="hidden sm:inline">Каталог</span>
+          </>
+        )}
       </button>
 
       {open && (
