@@ -24,6 +24,7 @@ interface ListContextValue {
   removedItems: ListItem[];
   restoreItem: (productId: string) => void;
   clearRemoved: () => void;
+  clearList: () => void;
 }
 
 const ListContext = createContext<ListContextValue | null>(null);
@@ -88,6 +89,7 @@ export function ListProvider({ children }: { children: React.ReactNode }) {
   };
 
   const clearRemoved = () => setRemovedItems([]);
+  const clearList = () => { setItems([]); setRemovedItems([]); };
 
   const setQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0.001) {
@@ -145,6 +147,7 @@ export function ListProvider({ children }: { children: React.ReactNode }) {
     removedItems,
     restoreItem,
     clearRemoved,
+    clearList,
   };
 
   return <ListContext.Provider value={value}>{children}</ListContext.Provider>;
