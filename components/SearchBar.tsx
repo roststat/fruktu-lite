@@ -72,7 +72,7 @@ export default function SearchBar({ className = "" }: { className?: string }) {
           if (e.key === "Enter") goToSearch(query);
         }}
         placeholder="Название товара или категории"
-        className="w-full rounded-[10px] border border-black/10 bg-white px-4 py-2.5 text-sm shadow-sm outline-none focus:border-primary"
+        className="w-full rounded-[10px] border border-black/10 bg-white px-4 py-3 text-base shadow-sm outline-none focus:border-primary"
       />
       {hasSuggestions && (
         <div className="absolute left-0 right-0 top-full z-30 mt-2 overflow-hidden rounded-[10px] border border-black/5 bg-white shadow-lg">

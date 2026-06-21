@@ -29,7 +29,7 @@ export default function CategoryMenu() {
     <div ref={rootRef} className="relative shrink-0">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 rounded-[10px] bg-primary px-3 py-2 text-sm font-semibold text-white"
+        className="flex items-center gap-2 rounded-[10px] bg-primary px-4 py-3 text-base font-semibold text-white"
       >
         <span aria-hidden>☰</span>
         <span className="hidden sm:inline">Каталог</span>

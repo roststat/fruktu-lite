@@ -27,7 +27,7 @@ export default function Header() {
       ref={headerRef}
       className="sticky top-0 z-40 border-b border-black/5 bg-background/95 backdrop-blur"
     >
-      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <Link href="/catalog" className="flex items-center gap-2 shrink-0">
             <span className="text-2xl">🧺</span>
@@ -40,51 +40,26 @@ export default function Header() {
             </span>
           </Link>
 
-          <div className="hidden flex-1 items-center gap-2 md:flex md:max-w-md">
-            <CategoryMenu />
-            <SearchBar />
-          </div>
-
           <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden items-center gap-2 md:flex">
-              <span className="rounded-[10px] bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary-dark">
-                г. Ялта
-              </span>
-              <button
-                onClick={() => setZoneOpen(true)}
-                className="rounded-[10px] bg-accent/20 px-3 py-1.5 text-sm font-semibold text-accent hover:bg-accent/30"
-              >
-                Зона доставки
-              </button>
-            </div>
+            <span className="hidden rounded-[10px] bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary-dark sm:inline">
+              г. Ялта
+            </span>
+            <button
+              onClick={() => setZoneOpen(true)}
+              className="hidden rounded-[10px] bg-accent/20 px-3 py-1.5 text-sm font-semibold text-accent hover:bg-accent/30 sm:inline-block"
+            >
+              Зона доставки
+            </button>
             <a
               href="tel:+79790474734"
-              className="hidden rounded-[10px] bg-primary px-3 py-1.5 text-sm font-semibold text-white md:inline-block"
+              className="rounded-[10px] bg-primary px-3 py-1.5 text-sm font-semibold text-white"
             >
               +7 979 047-47-34
             </a>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
-          <span className="shrink-0 rounded-[10px] bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary-dark">
-            г. Ялта
-          </span>
-          <button
-            onClick={() => setZoneOpen(true)}
-            className="shrink-0 rounded-[10px] bg-accent/20 px-3 py-1.5 text-xs font-semibold text-accent"
-          >
-            Зона доставки
-          </button>
-          <a
-            href="tel:+79790474734"
-            className="ml-auto shrink-0 rounded-[10px] bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary-dark"
-          >
-            +7 979 047-47-34
-          </a>
-        </div>
-
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-2">
           <CategoryMenu />
           <SearchBar />
         </div>
