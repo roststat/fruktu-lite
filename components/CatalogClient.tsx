@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   products,
@@ -44,13 +44,21 @@ export default function CatalogClient() {
 
   const clearSearch = () => router.push("/catalog");
 
+  const skipClearanceResetRef = useRef(false);
+
   const showAllClearance = () => {
+    skipClearanceResetRef.current = true;
     setActiveCategory(ALL_CATEGORY_ID);
     router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
   };
 
   useEffect(() => {
     setActiveCategory(initialCategory);
+    if (skipClearanceResetRef.current) {
+      skipClearanceResetRef.current = false;
+    } else {
+      setClearanceOn(false);
+    }
   }, [initialCategory]);
 
   return (
@@ -80,7 +88,7 @@ export default function CatalogClient() {
           </div>
           {(searchQuery || (activeCategory && activeCategory !== ALL_CATEGORY_ID)) && (
             <button
-              onClick={searchQuery ? clearSearch : () => setActiveCategory(null)}
+              onClick={searchQuery ? clearSearch : () => { setActiveCategory(null); setClearanceOn(false); }}
               className="shrink-0 rounded-[10px] bg-primary/10 px-3 py-2 text-sm font-bold text-primary-dark"
             >
               Все ✕
