@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useList } from "@/context/ListContext";
 
 export default function FloatingCartButton() {
+  const pathname = usePathname();
   const { totalCount, totalQuantity, openList } = useList();
   const [justAdded, setJustAdded] = useState(false);
   const prevQuantityRef = useRef(totalQuantity);
@@ -17,6 +19,8 @@ export default function FloatingCartButton() {
     }
     prevQuantityRef.current = totalQuantity;
   }, [totalQuantity]);
+
+  if (pathname?.startsWith("/order/")) return null;
 
   return (
     <div className="fixed bottom-5 right-5 z-40 flex items-center gap-2">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import SearchBar from "./SearchBar";
 import CategoryMenu from "./CategoryMenu";
 import DeliveryZoneModal from "./DeliveryZoneModal";
@@ -10,6 +11,8 @@ import LogoIcon from "./LogoIcon";
 export default function Header() {
   const [zoneOpen, setZoneOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const pathname = usePathname();
+  const isOrderPage = pathname?.startsWith("/order/");
 
   useEffect(() => {
     const el = headerRef.current;
@@ -63,10 +66,12 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <CategoryMenu />
-          <SearchBar />
-        </div>
+        {!isOrderPage && (
+          <div className="flex items-center gap-2">
+            <CategoryMenu />
+            <SearchBar />
+          </div>
+        )}
       </div>
 
       <DeliveryZoneModal open={zoneOpen} onClose={() => setZoneOpen(false)} />

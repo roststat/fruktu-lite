@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useList } from "@/context/ListContext";
 import { getCartProductById, formatQuantity, getQuantityStep } from "@/data/catalog";
 
@@ -13,6 +13,7 @@ const FREE_DELIVERY_WEIGHT_LIMIT = 15;
 
 export default function ListDrawer() {
   const router = useRouter();
+  const pathname = usePathname();
   const {
     items,
     isOpen,
@@ -46,7 +47,7 @@ export default function ListDrawer() {
     if (isOpen) setShowForm(false);
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || pathname?.startsWith("/order/")) return null;
 
   const isOverWeightLimit = totalWeight > FREE_DELIVERY_WEIGHT_LIMIT;
   const deliveryCost =
