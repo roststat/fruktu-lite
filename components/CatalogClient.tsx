@@ -14,11 +14,11 @@ import ProductCard from "./ProductCard";
 import ClearanceCard from "./ClearanceCard";
 import CategoryMenu from "./CategoryMenu";
 
-export default function CatalogClient() {
+export default function CatalogClient({ embedded = false }: { embedded?: boolean } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get("category");
-  const searchQuery = searchParams.get("q")?.trim().toLowerCase() ?? "";
+  const initialCategory = embedded ? null : searchParams.get("category");
+  const searchQuery = embedded ? "" : (searchParams.get("q")?.trim().toLowerCase() ?? "");
   const [activeCategory, setActiveCategory] = useState<string | null>(
     initialCategory
   );
@@ -47,12 +47,17 @@ export default function CatalogClient() {
   const skipClearanceResetRef = useRef(false);
 
   const showAllClearance = () => {
+    if (embedded) {
+      setActiveCategory(ALL_CATEGORY_ID);
+      return;
+    }
     skipClearanceResetRef.current = true;
     setActiveCategory(ALL_CATEGORY_ID);
     router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
   };
 
   useEffect(() => {
+    if (embedded) return;
     setActiveCategory(initialCategory);
     if (skipClearanceResetRef.current) {
       skipClearanceResetRef.current = false;
@@ -63,7 +68,7 @@ export default function CatalogClient() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
-      <h1 className="mb-4 text-2xl font-extrabold">Каталог</h1>
+      {!embedded && <h1 className="mb-4 text-2xl font-extrabold">Каталог</h1>}
 
       <div
         className="sticky z-30 -mx-4 mb-4 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
@@ -83,6 +88,9 @@ export default function CatalogClient() {
                         : "🛒 Все товары"}
                   </span>
                 </span>
+              }
+              onSelectCategory={
+                embedded ? (id) => { setActiveCategory(id); setClearanceOn(false); } : undefined
               }
             />
           </div>

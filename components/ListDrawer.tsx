@@ -33,7 +33,6 @@ export default function ListDrawer() {
   const [address, setAddress] = useState("");
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [orderId, setOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -44,7 +43,7 @@ export default function ListDrawer() {
 
   // reset form when drawer opens fresh
   useEffect(() => {
-    if (isOpen) { setShowForm(false); setOrderId(null); }
+    if (isOpen) setShowForm(false);
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -73,14 +72,10 @@ export default function ListDrawer() {
       }),
     });
     const data = await res.json();
-    setOrderId(data.id);
     clearList?.();
     setSubmitting(false);
-  };
-
-  const goToOrder = () => {
     closeList();
-    router.push(`/order/${orderId}`);
+    router.push(`/order/${data.id}`);
   };
 
   return (
@@ -134,13 +129,13 @@ export default function ListDrawer() {
 
         {/* Items list */}
         <div className="flex-1 overflow-y-auto p-4">
-          {items.length === 0 && !orderId ? (
+          {items.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted">
               <span className="text-4xl">🧺</span>
               <p>Список пока пуст.</p>
               <p className="text-sm">Добавляйте товары из каталога — мы сходим на рынок и купим всё для вас.</p>
             </div>
-          ) : orderId ? null : (
+          ) : (
             <ul className="flex flex-col gap-3">
               {items.map((item) => {
                 const entry = getCartProductById(item.productId);
@@ -171,16 +166,7 @@ export default function ListDrawer() {
         </div>
 
         {/* Footer */}
-        {orderId ? (
-          <div className="border-t border-black/5 p-4 text-center">
-            <span className="mb-3 block text-3xl">✅</span>
-            <p className="mb-1 text-lg font-bold">Заказ оформлен!</p>
-            <p className="mb-4 text-sm text-muted">Менеджер свяжется с вами для подтверждения</p>
-            <button onClick={goToOrder} className="w-full rounded-[10px] bg-primary py-3 text-sm font-bold text-white">
-              Отслеживать статус и редактировать
-            </button>
-          </div>
-        ) : items.length > 0 && (
+        {items.length > 0 && (
           <div className="border-t border-black/5 p-4">
             {/* Totals */}
             <div className="mb-1 flex items-center justify-between text-sm text-muted">

@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { categories, virtualCategories, ALL_CATEGORY_ID } from "@/data/catalog";
 
-export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}) {
+export default function CategoryMenu({
+  label,
+  onSelectCategory,
+}: { label?: React.ReactNode; onSelectCategory?: (id: string) => void } = {}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -22,7 +25,8 @@ export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}
 
   const goToCategory = (id: string) => {
     setOpen(false);
-    router.push(`/catalog?category=${id}`);
+    if (onSelectCategory) onSelectCategory(id);
+    else router.push(`/catalog?category=${id}`);
   };
 
   const allCategory = virtualCategories.find((c) => c.id === ALL_CATEGORY_ID)!;

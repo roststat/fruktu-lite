@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getCartProductById, formatQuantity, getQuantityStep } from "@/data/catalog";
+import AddToOrderModal from "@/components/AddToOrderModal";
 
 const round = (n: number) => Math.round(n * 10) / 10;
 
@@ -41,6 +42,8 @@ export default function OrderPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   // editable fields
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -75,7 +78,7 @@ export default function OrderPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         items,
-        itemsCount: items.reduce((s, i) => s + i.quantity, 0),
+        itemsCount: items.length,
         estimatedTotal: computedTotal,
         phone,
         address,
@@ -85,6 +88,46 @@ export default function OrderPage() {
     await load();
     setSaving(false);
     setEditing(false);
+  };
+
+  const handleAddItems = async (newItems: OrderItem[]) => {
+    if (!order) return;
+    const merged = [...order.items];
+    for (const newItem of newItems) {
+      const idx = merged.findIndex((i) => i.productId === newItem.productId);
+      if (idx >= 0) {
+        merged[idx] = { ...merged[idx], quantity: merged[idx].quantity + newItem.quantity };
+      } else {
+        merged.push(newItem);
+      }
+    }
+    const mergedTotal = merged.reduce((sum, item) => {
+      const entry = getCartProductById(item.productId);
+      return entry ? sum + Math.round(entry.price * item.quantity) : sum;
+    }, 0);
+
+    await fetch(`/api/orders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: merged,
+        itemsCount: merged.length,
+        estimatedTotal: mergedTotal,
+      }),
+    });
+    await load();
+  };
+
+  const handleCancel = async () => {
+    if (!confirm("Точно отменить заказ?")) return;
+    setCancelling(true);
+    await fetch(`/api/orders/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "cancelled" }),
+    });
+    await load();
+    setCancelling(false);
   };
 
   const setQty = (productId: string, qty: number) => {
@@ -131,12 +174,18 @@ export default function OrderPage() {
       </div>
 
       {/* Dates */}
-      <div className="mb-6 flex gap-6 text-sm text-muted">
+      <div className="mb-4 flex gap-6 text-sm text-muted">
         <span>Создан: {new Date(order.createdAt).toLocaleString("ru")}</span>
         {order.updatedAt !== order.createdAt && (
           <span>Обновлён: {new Date(order.updatedAt).toLocaleString("ru")}</span>
         )}
       </div>
+
+      {!["done", "cancelled"].includes(order.status) && (
+        <div className="mb-6 rounded-[16px] border border-primary/20 bg-primary/5 p-4 text-sm text-primary-dark">
+          Мы начали собирать ваш заказ. После смены статуса на «Собран» появится окончательная стоимость заказа, и можно будет оплатить онлайн.
+        </div>
+      )}
 
       {/* Contact info */}
       <section className="mb-6 rounded-[16px] border border-black/5 bg-white p-4">
@@ -278,7 +327,7 @@ export default function OrderPage() {
       </section>
 
       {/* Actions */}
-      {editing && (
+      {editing ? (
         <div className="flex gap-3">
           <button
             onClick={handleSave}
@@ -294,6 +343,26 @@ export default function OrderPage() {
             Отмена
           </button>
         </div>
+      ) : !["done", "cancelled"].includes(order.status) && (
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="w-full rounded-[10px] bg-primary py-3 text-sm font-bold text-white"
+          >
+            ➕ Добавить к заказу
+          </button>
+          <button
+            onClick={handleCancel}
+            disabled={cancelling}
+            className="w-full rounded-[10px] bg-red-50 py-3 text-sm font-bold text-red-600 disabled:opacity-60"
+          >
+            {cancelling ? "Отменяем…" : "Отменить заказ"}
+          </button>
+        </div>
+      )}
+
+      {showAddModal && (
+        <AddToOrderModal onClose={() => setShowAddModal(false)} onConfirm={handleAddItems} />
       )}
     </div>
   );
