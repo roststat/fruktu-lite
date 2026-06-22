@@ -7,8 +7,10 @@ import {
   getCategoryById,
   productMatchesCategory,
   textMatchesQuery,
+  CLEARANCE_CATEGORY_ID,
 } from "@/data/catalog";
 import ProductCard from "./ProductCard";
+import ClearanceCard from "./ClearanceCard";
 import ClearanceSection from "./ClearanceSection";
 import CategoryMenu from "./CategoryMenu";
 
@@ -47,42 +49,44 @@ export default function CatalogClient() {
         </div>
       )}
 
-      <div
-        className="sticky z-30 -mx-4 mb-6 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
-        style={{ top: "var(--header-height, 0px)" }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex-1 min-w-0">
-            <CategoryMenu
-              label={
-                <span className="flex w-full items-center gap-2 truncate">
-                  <span aria-hidden>☰</span>
-                  <span className="truncate">
-                    {searchQuery
-                      ? `🔍 «${searchQuery}»`
-                      : activeCategoryObj
-                        ? `${activeCategoryObj.icon} ${activeCategoryObj.name}`
-                        : "Каталог"}
+      {(searchQuery || activeCategoryObj) && (
+        <div
+          className="sticky z-30 -mx-4 mb-6 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
+          style={{ top: "var(--header-height, 0px)" }}
+        >
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <CategoryMenu
+                label={
+                  <span className="flex w-full items-center gap-2 truncate">
+                    <span aria-hidden>☰</span>
+                    <span className="truncate">
+                      {searchQuery
+                        ? `🔍 «${searchQuery}»`
+                        : `${activeCategoryObj!.icon} ${activeCategoryObj!.name}`}
+                    </span>
                   </span>
-                </span>
-              }
-            />
-          </div>
-          {(searchQuery || activeCategoryObj) && (
+                }
+              />
+            </div>
             <button
               onClick={searchQuery ? clearSearch : () => setActiveCategory(null)}
               className="shrink-0 rounded-[10px] bg-primary/10 px-3 py-2 text-sm font-bold text-primary-dark"
             >
               Все ✕
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3">
-        {filtered.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        {filtered.map((product) =>
+          activeCategory === CLEARANCE_CATEGORY_ID ? (
+            <ClearanceCard key={product.id} product={product} />
+          ) : (
+            <ProductCard key={product.id} product={product} />
+          )
+        )}
       </div>
 
       {filtered.length === 0 && (

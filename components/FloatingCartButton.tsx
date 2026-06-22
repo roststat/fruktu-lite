@@ -32,7 +32,7 @@ export default function FloatingCartButton() {
       <button
         onClick={openList}
         aria-label="Открыть список покупок"
-        className={`relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-white text-4xl shadow-lg shadow-primary/20 transition hover:bg-primary/5 hover:shadow-xl ${
+        className={`relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-white text-4xl shadow-lg shadow-primary/20 transition hover:border-primary-dark hover:bg-primary/15 hover:shadow-xl ${
           justAdded ? "animate-cart-bump" : ""
         }`}
       >

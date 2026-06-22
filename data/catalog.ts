@@ -441,8 +441,16 @@ export function getCartProductById(id: string): CartProduct | undefined {
   return { product, price: product.price, isClearance: false };
 }
 
+export const SEASONAL_CATEGORY_ID = "seasonal";
+export const CLEARANCE_CATEGORY_ID = "clearance";
+
+export const virtualCategories: Category[] = [
+  { id: SEASONAL_CATEGORY_ID, name: "Самый сезон", icon: "🌱" },
+  { id: CLEARANCE_CATEGORY_ID, name: "Зелёный каталог (Уценка)", icon: "🏷️" },
+];
+
 export function getCategoryById(id: string): Category | undefined {
-  for (const c of categories) {
+  for (const c of [...categories, ...virtualCategories]) {
     if (c.id === id) return c;
     const sub = c.subcategories?.find((s) => s.id === id);
     if (sub) return sub;
@@ -461,6 +469,8 @@ export function productMatchesCategory(
   product: Product,
   categoryId: string
 ): boolean {
+  if (categoryId === SEASONAL_CATEGORY_ID) return Boolean(product.seasonal);
+  if (categoryId === CLEARANCE_CATEGORY_ID) return Boolean(product.clearance);
   const category = getCategoryById(categoryId);
   if (!category) return product.categoryId === categoryId;
   return getCategoryDescendantIds(category).includes(product.categoryId);

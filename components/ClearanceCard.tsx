@@ -28,7 +28,7 @@ export default function ClearanceCard({ product }: { product: Product }) {
           {product.icon}
         </div>
         <span className="absolute left-2 top-2 rounded-[20px] bg-green-600 px-2.5 py-1 text-[11px] font-bold text-white">
-          🏷️ Зелёный ценник
+          🏷️ Уценка
         </span>
         <span className="absolute bottom-2 left-2 rounded-[8px] bg-white px-2.5 py-1 text-sm font-bold shadow-sm">
           <span className="text-green-700">{product.clearance.price} ₽</span>

@@ -23,11 +23,6 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="flex h-full items-center justify-center text-7xl sm:text-8xl">
           {product.icon}
         </div>
-        {product.seasonal && (
-          <span className="absolute left-2 top-2 rounded-[20px] bg-accent/90 px-2.5 py-1 text-[11px] font-bold text-white">
-            🌱 сезон
-          </span>
-        )}
         <span className="absolute bottom-2 left-2 rounded-[8px] bg-white px-2.5 py-1 text-sm font-bold text-foreground shadow-sm">
           {product.price} ₽/{product.unit}
         </span>

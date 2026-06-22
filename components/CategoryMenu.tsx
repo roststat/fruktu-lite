@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { categories } from "@/data/catalog";
+import { categories, virtualCategories } from "@/data/catalog";
 
 export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}) {
   const router = useRouter();
@@ -70,6 +70,17 @@ export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}
               )}
             </div>
           ))}
+          <div className="mt-1 border-t border-black/5 pt-1">
+            {virtualCategories.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => goToCategory(c.id)}
+                className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-primary-dark hover:bg-primary/10"
+              >
+                {c.icon} {c.name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
