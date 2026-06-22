@@ -8,6 +8,7 @@ import {
   productMatchesCategory,
   textMatchesQuery,
   CLEARANCE_CATEGORY_ID,
+  ALL_CATEGORY_ID,
 } from "@/data/catalog";
 import ProductCard from "./ProductCard";
 import ClearanceCard from "./ClearanceCard";
@@ -49,35 +50,37 @@ export default function CatalogClient() {
         </div>
       )}
 
-      {(searchQuery || activeCategoryObj) && (
-        <div
-          className="sticky z-30 -mx-4 mb-6 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
-          style={{ top: "var(--header-height, 0px)" }}
-        >
-          <div className="flex items-center gap-2">
-            <div className="flex-1 min-w-0">
-              <CategoryMenu
-                label={
-                  <span className="flex w-full items-center gap-2 truncate">
-                    <span aria-hidden>☰</span>
-                    <span className="truncate">
-                      {searchQuery
-                        ? `🔍 «${searchQuery}»`
-                        : `${activeCategoryObj!.icon} ${activeCategoryObj!.name}`}
-                    </span>
+      <div
+        className="sticky z-30 -mx-4 mb-6 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
+        style={{ top: "var(--header-height, 0px)" }}
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <CategoryMenu
+              label={
+                <span className="flex w-full items-center gap-2 truncate">
+                  <span aria-hidden>☰</span>
+                  <span className="truncate">
+                    {searchQuery
+                      ? `🔍 «${searchQuery}»`
+                      : activeCategoryObj
+                        ? `${activeCategoryObj.icon} ${activeCategoryObj.name}`
+                        : "🛒 Все товары"}
                   </span>
-                }
-              />
-            </div>
+                </span>
+              }
+            />
+          </div>
+          {(searchQuery || (activeCategory && activeCategory !== ALL_CATEGORY_ID)) && (
             <button
               onClick={searchQuery ? clearSearch : () => setActiveCategory(null)}
               className="shrink-0 rounded-[10px] bg-primary/10 px-3 py-2 text-sm font-bold text-primary-dark"
             >
               Все ✕
             </button>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {filtered.map((product) =>
