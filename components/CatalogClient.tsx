@@ -23,18 +23,34 @@ export default function CatalogClient() {
   const [activeCategory, setActiveCategory] = useState<string | null>(
     initialCategory
   );
+  const [clearanceOn, setClearanceOn] = useState(false);
+  const [seasonalOn, setSeasonalOn] = useState(false);
 
+  const isDefaultCategory = !activeCategory || activeCategory === ALL_CATEGORY_ID;
   const activeCategoryObj = activeCategory
     ? getCategoryById(activeCategory)
     : null;
 
-  const filtered = searchQuery
+  const base = searchQuery
     ? products.filter((p) => textMatchesQuery(p.name, searchQuery))
-    : activeCategory
+    : activeCategory && activeCategory !== ALL_CATEGORY_ID
       ? products.filter((p) => productMatchesCategory(p, activeCategory))
       : products;
 
+  const filtered = base.filter((p) => {
+    if (clearanceOn && !p.clearance) return false;
+    if (seasonalOn && !p.seasonal) return false;
+    return true;
+  });
+
+  const showClearanceCards = clearanceOn || activeCategory === CLEARANCE_CATEGORY_ID;
+
   const clearSearch = () => router.push("/catalog");
+
+  const showAllClearance = () => {
+    setActiveCategory(ALL_CATEGORY_ID);
+    router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
+  };
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -51,7 +67,7 @@ export default function CatalogClient() {
       )}
 
       <div
-        className="sticky z-30 -mx-4 mb-6 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
+        className="sticky z-30 -mx-4 mb-4 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
         style={{ top: "var(--header-height, 0px)" }}
       >
         <div className="flex items-center gap-2">
@@ -82,9 +98,41 @@ export default function CatalogClient() {
         </div>
       </div>
 
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => setClearanceOn((v) => !v)}
+          className={`rounded-[10px] px-3 py-2 text-sm font-bold transition-colors ${
+            clearanceOn
+              ? "bg-green-600 text-white"
+              : "bg-green-600/10 text-green-700 hover:bg-green-600/15"
+          }`}
+        >
+          🏷️ {isDefaultCategory ? "ЗЕЛЁНЫЙ КАТАЛОГ" : "УЦЕНКА"}
+        </button>
+        <button
+          onClick={() => setSeasonalOn((v) => !v)}
+          className={`rounded-[10px] px-3 py-2 text-sm font-bold transition-colors ${
+            seasonalOn
+              ? "bg-accent text-white"
+              : "bg-accent/10 text-accent hover:bg-accent/15"
+          }`}
+        >
+          🌱 САМЫЙ СЕЗОН
+        </button>
+
+        {clearanceOn && !isDefaultCategory && (
+          <button
+            onClick={showAllClearance}
+            className="ml-1 text-sm font-semibold text-primary-dark underline hover:text-primary"
+          >
+            Показать все товары с уценкой
+          </button>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3">
         {filtered.map((product) =>
-          activeCategory === CLEARANCE_CATEGORY_ID ? (
+          showClearanceCards ? (
             <ClearanceCard key={product.id} product={product} />
           ) : (
             <ProductCard key={product.id} product={product} />
@@ -96,7 +144,7 @@ export default function CatalogClient() {
         <p className="py-12 text-center text-muted">
           {searchQuery
             ? "По вашему запросу ничего не найдено."
-            : "В этой категории пока нет товаров."}
+            : "Подходящих товаров не нашлось — попробуйте отключить фильтры."}
         </p>
       )}
     </div>
