@@ -441,10 +441,12 @@ export function getCartProductById(id: string): CartProduct | undefined {
   return { product, price: product.price, isClearance: false };
 }
 
+export const ALL_CATEGORY_ID = "all";
 export const SEASONAL_CATEGORY_ID = "seasonal";
 export const CLEARANCE_CATEGORY_ID = "clearance";
 
 export const virtualCategories: Category[] = [
+  { id: ALL_CATEGORY_ID, name: "Все товары", icon: "🛒" },
   { id: SEASONAL_CATEGORY_ID, name: "Самый сезон", icon: "🌱" },
   { id: CLEARANCE_CATEGORY_ID, name: "Зелёный каталог (Уценка)", icon: "🏷️" },
 ];
@@ -469,6 +471,7 @@ export function productMatchesCategory(
   product: Product,
   categoryId: string
 ): boolean {
+  if (categoryId === ALL_CATEGORY_ID) return true;
   if (categoryId === SEASONAL_CATEGORY_ID) return Boolean(product.seasonal);
   if (categoryId === CLEARANCE_CATEGORY_ID) return Boolean(product.clearance);
   const category = getCategoryById(categoryId);

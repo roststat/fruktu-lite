@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { categories, virtualCategories } from "@/data/catalog";
+import { categories, virtualCategories, ALL_CATEGORY_ID } from "@/data/catalog";
 
 export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}) {
   const router = useRouter();
@@ -20,10 +20,13 @@ export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, [open]);
 
-  const goToCategory = (id: string | null) => {
+  const goToCategory = (id: string) => {
     setOpen(false);
-    router.push(id ? `/catalog?category=${id}` : "/catalog");
+    router.push(`/catalog?category=${id}`);
   };
+
+  const allCategory = virtualCategories.find((c) => c.id === ALL_CATEGORY_ID)!;
+  const extraCategories = virtualCategories.filter((c) => c.id !== ALL_CATEGORY_ID);
 
   return (
     <div ref={rootRef} className={`relative ${label ? "w-full" : "shrink-0"}`}>
@@ -42,10 +45,10 @@ export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}
       {open && (
         <div className="absolute left-0 top-full z-50 mt-2 w-64 max-h-[70vh] overflow-y-auto rounded-[10px] bg-white p-2 shadow-xl">
           <button
-            onClick={() => goToCategory(null)}
+            onClick={() => goToCategory(allCategory.id)}
             className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-primary-dark hover:bg-primary/10"
           >
-            Все товары
+            {allCategory.icon} {allCategory.name}
           </button>
           {categories.map((c) => (
             <div key={c.id}>
@@ -71,7 +74,7 @@ export default function CategoryMenu({ label }: { label?: React.ReactNode } = {}
             </div>
           ))}
           <div className="mt-1 border-t border-black/5 pt-1">
-            {virtualCategories.map((c) => (
+            {extraCategories.map((c) => (
               <button
                 key={c.id}
                 onClick={() => goToCategory(c.id)}
