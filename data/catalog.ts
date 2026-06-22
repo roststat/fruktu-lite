@@ -448,7 +448,7 @@ export const CLEARANCE_CATEGORY_ID = "clearance";
 export const virtualCategories: Category[] = [
   { id: ALL_CATEGORY_ID, name: "Все товары", icon: "🛒" },
   { id: SEASONAL_CATEGORY_ID, name: "Самый сезон", icon: "🌱" },
-  { id: CLEARANCE_CATEGORY_ID, name: "Зелёный каталог (Уценка)", icon: "🏷️" },
+  { id: CLEARANCE_CATEGORY_ID, name: "Уценка", icon: "🏷️" },
 ];
 
 export function getCategoryById(id: string): Category | undefined {

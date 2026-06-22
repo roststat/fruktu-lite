@@ -12,7 +12,6 @@ import {
 } from "@/data/catalog";
 import ProductCard from "./ProductCard";
 import ClearanceCard from "./ClearanceCard";
-import ClearanceSection from "./ClearanceSection";
 import CategoryMenu from "./CategoryMenu";
 
 export default function CatalogClient() {
@@ -58,12 +57,6 @@ export default function CatalogClient() {
     <div className="mx-auto max-w-6xl px-4 py-6">
       <h1 className="mb-4 text-2xl font-extrabold">Каталог</h1>
 
-      {!searchQuery && !activeCategoryObj && (
-        <div className="mb-6">
-          <ClearanceSection />
-        </div>
-      )}
-
       <div
         className="sticky z-30 -mx-4 mb-4 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
         style={{ top: "var(--header-height, 0px)" }}
@@ -105,7 +98,7 @@ export default function CatalogClient() {
               : "bg-green-600/10 text-green-700 hover:bg-green-600/15"
           }`}
         >
-          🏷️ {isDefaultCategory ? "ЗЕЛЁНЫЙ КАТАЛОГ" : "УЦЕНКА"}
+          🏷️ УЦЕНКА
         </button>
 
         {clearanceOn && !isDefaultCategory && (
