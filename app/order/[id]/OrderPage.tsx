@@ -3,10 +3,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getCartProductById, formatQuantity, getQuantityStep } from "@/data/catalog";
+import { getCartProductById, formatQuantity, getQuantityStep, getItemWeightKg } from "@/data/catalog";
 import AddToOrderModal from "@/components/AddToOrderModal";
 
 const round = (n: number) => Math.round(n * 10) / 10;
+
+const FREE_DELIVERY_THRESHOLD = 3000;
+const DELIVERY_COST = 300;
+const FREE_DELIVERY_WEIGHT_LIMIT = 15;
 
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: string }> = {
   new:        { label: "Новый",         color: "bg-blue-100 text-blue-700",   icon: "🆕" },
@@ -70,6 +74,19 @@ export default function OrderPage() {
     if (!entry) return sum;
     return sum + Math.round(entry.price * item.quantity);
   }, 0);
+
+  const totalWeight = items.reduce((sum, item) => {
+    const entry = getCartProductById(item.productId);
+    return entry ? sum + getItemWeightKg(entry.product, item.quantity) : sum;
+  }, 0);
+  const isOverWeightLimit = totalWeight > FREE_DELIVERY_WEIGHT_LIMIT;
+  const goodsTotal = editing ? computedTotal : Math.round(Number(order?.estimatedTotal ?? 0));
+  const deliveryCost =
+    items.length === 0 ? 0
+    : isOverWeightLimit ? DELIVERY_COST
+    : goodsTotal >= FREE_DELIVERY_THRESHOLD ? 0
+    : DELIVERY_COST;
+  const grandTotal = goodsTotal + deliveryCost;
 
   const handleSave = async () => {
     setSaving(true);
@@ -290,14 +307,29 @@ export default function OrderPage() {
         <h2 className="mb-3 font-bold">Итого</h2>
         <div className="flex items-center justify-between text-sm text-muted">
           <span>Товаров</span>
-          <span>{order.itemsCount} позиций</span>
+          <span>{order.itemsCount} позиций · ~{goodsTotal} ₽</span>
+        </div>
+        <div className="mt-1 flex items-center justify-between text-sm text-muted">
+          <span>Общий вес</span>
+          <span className={isOverWeightLimit ? "font-semibold text-tomato" : ""}>~{round(totalWeight)} кг</span>
+        </div>
+        <div className="mt-1 flex items-center justify-between text-sm text-muted">
+          <span>Доставка по Ялте</span>
+          {deliveryCost === 0
+            ? <span className="font-semibold text-primary-dark">Бесплатно 🎉</span>
+            : <span>+{DELIVERY_COST} ₽</span>}
         </div>
         <div className="mt-1 flex items-center justify-between border-t border-black/5 pt-2">
-          <span className="text-sm text-muted">Ориентировочная сумма</span>
-          <span className="text-xl font-extrabold text-primary-dark">
-            ~{editing ? computedTotal : Math.round(Number(order.estimatedTotal))} ₽
-          </span>
+          <span className="text-sm text-muted">Итого с доставкой</span>
+          <span className="text-xl font-extrabold text-primary-dark">~{grandTotal} ₽</span>
         </div>
+        {deliveryCost > 0 && (
+          <p className="mt-1 text-xs text-muted">
+            {isOverWeightLimit
+              ? `Доставка платная: вес заказа превышает ${FREE_DELIVERY_WEIGHT_LIMIT} кг`
+              : `Бесплатная доставка при заказе от ${FREE_DELIVERY_THRESHOLD} ₽ и весом до ${FREE_DELIVERY_WEIGHT_LIMIT} кг`}
+          </p>
+        )}
         <p className="mt-1 text-xs text-muted">Точная сумма уточняется после сборки</p>
       </section>
 
