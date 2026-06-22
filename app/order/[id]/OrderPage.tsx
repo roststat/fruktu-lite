@@ -27,9 +27,13 @@ type Order = {
   address: string;
   comment: string | null;
   status: string;
+  messengerPlatform: string | null;
+  messengerChatId: string | null;
   createdAt: string;
   updatedAt: string;
 };
+
+const TELEGRAM_BOT_USERNAME = "fruktu_bot";
 
 export default function OrderPage() {
   const { id } = useParams<{ id: string }>();
@@ -246,6 +250,31 @@ export default function OrderPage() {
           </span>
         </div>
         <p className="mt-1 text-xs text-muted">Точная сумма уточняется после сборки</p>
+      </section>
+
+      {/* Messenger notifications */}
+      <section className="mb-6 rounded-[16px] border border-black/5 bg-white p-4">
+        <h2 className="mb-1 font-bold">Уведомления о заказе</h2>
+        {order.messengerPlatform === "telegram" && order.messengerChatId ? (
+          <p className="flex items-center gap-2 text-sm text-primary-dark">
+            <span aria-hidden>✅</span>
+            Подключены уведомления в Telegram
+          </p>
+        ) : (
+          <>
+            <p className="mb-3 text-sm text-muted">
+              Подключите Telegram — пришлём сообщение, когда заказ подтвердят, соберут и привезут.
+            </p>
+            <a
+              href={`https://t.me/${TELEGRAM_BOT_USERNAME}?start=order_${order.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-[10px] bg-[#229ED9] px-4 py-2.5 text-sm font-bold text-white"
+            >
+              ✈️ Подключить Telegram
+            </a>
+          </>
+        )}
       </section>
 
       {/* Actions */}
