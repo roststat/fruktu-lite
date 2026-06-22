@@ -200,7 +200,13 @@ export default function OrderPage() {
 
       {!["done", "cancelled"].includes(order.status) && (
         <div className="mb-6 rounded-[16px] border border-primary/20 bg-primary/5 p-4 text-sm text-primary-dark">
-          Мы начали собирать ваш заказ. После смены статуса на «Собран» появится окончательная стоимость заказа, и можно будет оплатить онлайн.
+          <p>Мы начали собирать ваш заказ. После смены статуса на «Собран» появится окончательная стоимость заказа, и можно будет оплатить онлайн.</p>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="mt-3 rounded-[10px] bg-primary px-4 py-2 text-sm font-bold text-white"
+          >
+            ➕ Добавить к заказу
+          </button>
         </div>
       )}
 
@@ -376,21 +382,13 @@ export default function OrderPage() {
           </button>
         </div>
       ) : !["done", "cancelled"].includes(order.status) && (
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="w-full rounded-[10px] bg-primary py-3 text-sm font-bold text-white"
-          >
-            ➕ Добавить к заказу
-          </button>
-          <button
-            onClick={handleCancel}
-            disabled={cancelling}
-            className="w-full rounded-[10px] bg-red-50 py-3 text-sm font-bold text-red-600 disabled:opacity-60"
-          >
-            {cancelling ? "Отменяем…" : "Отменить заказ"}
-          </button>
-        </div>
+        <button
+          onClick={handleCancel}
+          disabled={cancelling}
+          className="w-full rounded-[10px] bg-red-50 py-3 text-sm font-bold text-red-600 disabled:opacity-60"
+        >
+          {cancelling ? "Отменяем…" : "Отменить заказ"}
+        </button>
       )}
 
       {showAddModal && (
