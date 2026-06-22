@@ -24,7 +24,6 @@ export default function CatalogClient() {
     initialCategory
   );
   const [clearanceOn, setClearanceOn] = useState(false);
-  const [seasonalOn, setSeasonalOn] = useState(false);
 
   const isDefaultCategory = !activeCategory || activeCategory === ALL_CATEGORY_ID;
   const activeCategoryObj = activeCategory
@@ -39,7 +38,6 @@ export default function CatalogClient() {
 
   const filtered = base.filter((p) => {
     if (clearanceOn && !p.clearance) return false;
-    if (seasonalOn && !p.seasonal) return false;
     return true;
   });
 
@@ -108,16 +106,6 @@ export default function CatalogClient() {
           }`}
         >
           🏷️ {isDefaultCategory ? "ЗЕЛЁНЫЙ КАТАЛОГ" : "УЦЕНКА"}
-        </button>
-        <button
-          onClick={() => setSeasonalOn((v) => !v)}
-          className={`rounded-[10px] px-3 py-2 text-sm font-bold transition-colors ${
-            seasonalOn
-              ? "bg-accent text-white"
-              : "bg-accent/10 text-accent hover:bg-accent/15"
-          }`}
-        >
-          🌱 САМЫЙ СЕЗОН
         </button>
 
         {clearanceOn && !isDefaultCategory && (
