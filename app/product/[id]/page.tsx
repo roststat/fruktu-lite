@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   getCategoryById,
   getProductById,
@@ -33,8 +34,19 @@ export default async function ProductPage({
       )}
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="flex aspect-square items-center justify-center rounded-[10px] bg-primary/5 text-9xl">
-          {product.icon}
+        <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-[10px] bg-primary/5 text-9xl">
+          {product.image ? (
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+              priority
+            />
+          ) : (
+            product.icon
+          )}
         </div>
 
         <div className="flex flex-col gap-4">
