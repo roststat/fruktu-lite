@@ -55,13 +55,30 @@ export default async function ProductPage({
               🌱 сейчас сезон
             </span>
           )}
-          <h1 className="text-2xl font-extrabold">{product.name}</h1>
-          <p className="text-2xl font-bold text-primary-dark">
-            {product.price} ₽{" "}
-            <span className="text-base font-normal text-muted">
-              / {product.unit}
+          {product.discount && (
+            <span className="inline-flex w-fit items-center gap-1 rounded-[10px] bg-tomato/20 px-3 py-1 text-sm font-semibold text-tomato">
+              🔥 Скидка −{product.discount.percent}%
             </span>
-          </p>
+          )}
+          <h1 className="text-2xl font-extrabold">{product.name}</h1>
+          {product.discount ? (
+            <p className="text-2xl font-bold text-tomato">
+              {product.discount.price} ₽{" "}
+              <span className="text-base font-normal text-muted line-through">
+                {product.price} ₽
+              </span>{" "}
+              <span className="text-base font-normal text-muted">
+                / {product.unit}
+              </span>
+            </p>
+          ) : (
+            <p className="text-2xl font-bold text-primary-dark">
+              {product.price} ₽{" "}
+              <span className="text-base font-normal text-muted">
+                / {product.unit}
+              </span>
+            </p>
+          )}
           <p className="text-sm text-muted">
             Итоговая сумма заказа будет подтверждена после сборки на рынке —
             возможны небольшие отклонения по весу.

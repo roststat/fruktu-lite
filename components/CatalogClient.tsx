@@ -23,6 +23,7 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
     initialCategory
   );
   const [clearanceOn, setClearanceOn] = useState(false);
+  const [discountOn, setDiscountOn] = useState(false);
 
   const isDefaultCategory = !activeCategory || activeCategory === ALL_CATEGORY_ID;
   const activeCategoryObj = activeCategory
@@ -37,6 +38,7 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
 
   const filtered = base.filter((p) => {
     if (clearanceOn && !p.clearance) return false;
+    if (discountOn && !p.discount) return false;
     return true;
   });
 
@@ -44,14 +46,24 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
 
   const clearSearch = () => router.push("/catalog");
 
-  const skipClearanceResetRef = useRef(false);
+  const skipFilterResetRef = useRef(false);
 
   const showAllClearance = () => {
     if (embedded) {
       setActiveCategory(ALL_CATEGORY_ID);
       return;
     }
-    skipClearanceResetRef.current = true;
+    skipFilterResetRef.current = true;
+    setActiveCategory(ALL_CATEGORY_ID);
+    router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
+  };
+
+  const showAllDiscount = () => {
+    if (embedded) {
+      setActiveCategory(ALL_CATEGORY_ID);
+      return;
+    }
+    skipFilterResetRef.current = true;
     setActiveCategory(ALL_CATEGORY_ID);
     router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
   };
@@ -59,10 +71,11 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
   useEffect(() => {
     if (embedded) return;
     setActiveCategory(initialCategory);
-    if (skipClearanceResetRef.current) {
-      skipClearanceResetRef.current = false;
+    if (skipFilterResetRef.current) {
+      skipFilterResetRef.current = false;
     } else {
       setClearanceOn(false);
+      setDiscountOn(false);
     }
   }, [initialCategory]);
 
@@ -90,13 +103,13 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
                 </span>
               }
               onSelectCategory={
-                embedded ? (id) => { setActiveCategory(id); setClearanceOn(false); } : undefined
+                embedded ? (id) => { setActiveCategory(id); setClearanceOn(false); setDiscountOn(false); } : undefined
               }
             />
           </div>
           {(searchQuery || (activeCategory && activeCategory !== ALL_CATEGORY_ID)) && (
             <button
-              onClick={searchQuery ? clearSearch : () => { setActiveCategory(null); setClearanceOn(false); }}
+              onClick={searchQuery ? clearSearch : () => { setActiveCategory(null); setClearanceOn(false); setDiscountOn(false); }}
               className="shrink-0 rounded-[10px] bg-primary/10 px-3 py-2 text-sm font-bold text-primary-dark"
             >
               Все ✕
@@ -106,6 +119,16 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
+        <button
+          onClick={() => setDiscountOn((v) => !v)}
+          className={`rounded-[10px] px-3 py-2 text-sm font-bold transition-colors ${
+            discountOn
+              ? "bg-tomato text-white"
+              : "bg-tomato/10 text-tomato hover:bg-tomato/15"
+          }`}
+        >
+          🔥 СКИДКИ
+        </button>
         <button
           onClick={() => setClearanceOn((v) => !v)}
           className={`rounded-[10px] px-3 py-2 text-sm font-bold transition-colors ${
@@ -117,6 +140,14 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
           🏷️ УЦЕНКА
         </button>
 
+        {discountOn && !isDefaultCategory && (
+          <button
+            onClick={showAllDiscount}
+            className="ml-1 text-sm font-semibold text-primary-dark underline hover:text-primary"
+          >
+            Показать все товары со скидкой
+          </button>
+        )}
         {clearanceOn && !isDefaultCategory && (
           <button
             onClick={showAllClearance}

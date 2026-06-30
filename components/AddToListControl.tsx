@@ -21,7 +21,8 @@ export default function AddToListControl({
   if (!product) return null;
 
   const step = getQuantityStep(product);
-  const itemPrice = Math.round(product.price * quantity);
+  const effectivePrice = product.discount ? product.discount.price : product.price;
+  const itemPrice = Math.round(effectivePrice * quantity);
 
   if (quantity === 0) {
     return (

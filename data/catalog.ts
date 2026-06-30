@@ -19,6 +19,10 @@ export interface Product {
     price: number;
     reason: string;
   };
+  discount?: {
+    price: number;
+    percent: number;
+  };
 }
 
 export const categories: Category[] = [
@@ -1640,7 +1644,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🧈",
     image: "/images/products/moloko_ultrapasterizovannoe_domik_v_derevne_3_2_950g.webp",
-    clearance: { price: 154, reason: "Скидка" },
+    discount: { price: 154, percent: 14 },
   },
   {
     id: "moloko_ultrapasterizovannoe_domik_v_derevne_2_5_950g",
@@ -1695,7 +1699,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🧈",
     image: "/images/products/maslo_krestyanskoe_72_5_dzhankoyskoe_moloko_180g.webp",
-    clearance: { price: 259, reason: "Скидка" },
+    discount: { price: 259, percent: 16 },
   },
   {
     id: "moloko_3_2_dzhankoyskoe_moloko_900g_p_et_",
@@ -4207,7 +4211,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🍪",
     image: "/images/products/trubochki_snek_s_orekhovoy_nachinkoy_essen_400gr.webp",
-    clearance: { price: 159, reason: "Скидка" },
+    discount: { price: 159, percent: 20 },
   },
   {
     id: "pechene_s_kusochkami_molochnogo_shokolada_milka_126gr",
@@ -6080,7 +6084,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🧃",
     image: "/images/products/sokosoderzhashchiy_napitok_iz_apelsinov_mango_i_mandarinov_sochnaya_dolina_0_95l.webp",
-    clearance: { price: 115, reason: "Скидка" },
+    discount: { price: 115, percent: 15 },
   },
   {
     id: "multifruktovyy_sokosoderzhashchiy_napitok_sochnaya_dolina_0_95l",
@@ -6090,7 +6094,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🧃",
     image: "/images/products/multifruktovyy_sokosoderzhashchiy_napitok_sochnaya_dolina_0_95l.webp",
-    clearance: { price: 115, reason: "Скидка" },
+    discount: { price: 115, percent: 15 },
   },
   {
     id: "persikovo_yablochnyy_sokosoderzhashchiy_napitok_sochnaya_dolina_0_95l",
@@ -6100,7 +6104,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🧃",
     image: "/images/products/persikovo_yablochnyy_sokosoderzhashchiy_napitok_sochnaya_dolina_0_95l.webp",
-    clearance: { price: 115, reason: "Скидка" },
+    discount: { price: 115, percent: 15 },
   },
   {
     id: "nektar_tomatnyy_s_myakotyu_s_solyu_sochnaya_dolina_0_95l",
@@ -6110,7 +6114,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🧃",
     image: "/images/products/nektar_tomatnyy_s_myakotyu_s_solyu_sochnaya_dolina_0_95l.webp",
-    clearance: { price: 115, reason: "Скидка" },
+    discount: { price: 115, percent: 15 },
   },
   {
     id: "yablochnyy_sokosoderzhashchiy_napitok_osvetlennyy_sochnaya_dolina_0_95l",
@@ -6120,7 +6124,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🧃",
     image: "/images/products/yablochnyy_sokosoderzhashchiy_napitok_osvetlennyy_sochnaya_dolina_0_95l.webp",
-    clearance: { price: 115, reason: "Скидка" },
+    discount: { price: 115, percent: 15 },
   },
   {
     id: "sok_tomatnyy_pryamogo_otzhima_soki_kryma_1l",
@@ -7948,7 +7952,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🍝",
     image: "/images/products/makaronnye_izdeliya_barilla_bavettine_450_g_.webp",
-    clearance: { price: 104, reason: "Скидка" },
+    discount: { price: 104, percent: 13 },
   },
   {
     id: "makaronnye_izdeliya_barilla_pipe_rigate_450_g",
@@ -10369,7 +10373,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🍜",
     image: "/images/products/lapsha_bystrogo_prigotovleniya_doshirak_kvisti_govyadina_70gr_.webp",
-    clearance: { price: 25, reason: "Скидка" },
+    discount: { price: 25, percent: 17 },
   },
   {
     id: "lapsha_bystrogo_prigotovleniya_doshirak_sytnyy_obed_so_vkusom_govyadiny_110g",
@@ -11009,7 +11013,7 @@ export const products: Product[] = [
     unit: "шт",
     icon: "🪥",
     image: "/images/products/zubnaya_pasta_multikompleks_silcamed_100_g.webp",
-    clearance: { price: 99, reason: "Скидка" },
+    discount: { price: 99, percent: 23 },
   },
   {
     id: "zubnaya_pasta_belosnezhnaya_ulybka_silcamed_110_g",
@@ -12895,16 +12899,22 @@ export function getCartProductById(id: string): CartProduct | undefined {
   }
   const product = getProductById(id);
   if (!product) return undefined;
-  return { product, price: product.price, isClearance: false };
+  return {
+    product,
+    price: product.discount ? product.discount.price : product.price,
+    isClearance: false,
+  };
 }
 
 export const ALL_CATEGORY_ID = "all";
 export const SEASONAL_CATEGORY_ID = "seasonal";
 export const CLEARANCE_CATEGORY_ID = "clearance";
+export const DISCOUNT_CATEGORY_ID = "discount";
 
 export const virtualCategories: Category[] = [
   { id: ALL_CATEGORY_ID, name: "Все товары", icon: "🛒" },
   { id: SEASONAL_CATEGORY_ID, name: "Самый сезон", icon: "🌱" },
+  { id: DISCOUNT_CATEGORY_ID, name: "Скидки", icon: "🔥" },
   { id: CLEARANCE_CATEGORY_ID, name: "Уценка", icon: "🏷️" },
 ];
 
@@ -12931,6 +12941,7 @@ export function productMatchesCategory(
   if (categoryId === ALL_CATEGORY_ID) return true;
   if (categoryId === SEASONAL_CATEGORY_ID) return Boolean(product.seasonal);
   if (categoryId === CLEARANCE_CATEGORY_ID) return Boolean(product.clearance);
+  if (categoryId === DISCOUNT_CATEGORY_ID) return Boolean(product.discount);
   const category = getCategoryById(categoryId);
   if (!category) return product.categoryId === categoryId;
   return getCategoryDescendantIds(category).includes(product.categoryId);
@@ -12949,6 +12960,10 @@ export function getSeasonalProducts(): Product[] {
 
 export function getClearanceProducts(): Product[] {
   return products.filter((p) => p.clearance);
+}
+
+export function getDiscountProducts(): Product[] {
+  return products.filter((p) => p.discount);
 }
 
 export function isWeightProduct(product: Product): boolean {

@@ -16,7 +16,8 @@ export default function ProductCard({ product }: { product: Product }) {
   const { getQuantity, setQuantity, addItem } = useList();
   const quantity = getQuantity(product.id);
   const step = getQuantityStep(product);
-  const itemPrice = Math.round(product.price * quantity);
+  const effectivePrice = product.discount ? product.discount.price : product.price;
+  const itemPrice = Math.round(effectivePrice * quantity);
 
   return (
     <div className="flex flex-col">
@@ -34,8 +35,21 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.icon}
           </div>
         )}
+        {product.discount && (
+          <span className="absolute left-2 top-2 rounded-[20px] bg-tomato px-2.5 py-1 text-[11px] font-bold text-white">
+            🔥 Скидка −{product.discount.percent}%
+          </span>
+        )}
         <span className="absolute bottom-2 left-2 rounded-[8px] bg-white px-2.5 py-1 text-sm font-bold text-foreground shadow-sm">
-          {product.price} ₽/{product.unit}
+          {product.discount ? (
+            <>
+              <span className="text-tomato">{product.discount.price} ₽</span>
+              <span className="ml-1 text-xs text-muted line-through">{product.price} ₽</span>
+            </>
+          ) : (
+            <>{product.price} ₽</>
+          )}
+          /{product.unit}
         </span>
       </Link>
 
