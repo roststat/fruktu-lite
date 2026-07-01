@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 import { useList } from "@/context/ListContext";
 import { getCartProductById, formatQuantity, getQuantityStep } from "@/data/catalog";
 
@@ -113,7 +114,13 @@ export default function ListDrawer() {
                 if (!entry) return null;
                 return (
                   <li key={item.productId} className="flex items-center gap-3 rounded-[10px] border border-black/5 bg-white p-2">
-                    <span className="text-xl">{entry.product.icon}</span>
+                    <div className="relative h-9 w-9 shrink-0 rounded-[6px] bg-background overflow-hidden">
+                      {entry.product.image ? (
+                        <Image src={entry.product.image} alt={entry.product.name} fill sizes="36px" className="object-contain p-0.5" />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-xl">{entry.product.icon}</span>
+                      )}
+                    </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold">{entry.product.name}</p>
                       <p className="text-xs text-muted">{formatQuantity(entry.product, item.quantity)}</p>
@@ -146,7 +153,13 @@ export default function ListDrawer() {
                 const itemPrice = Math.round(price * item.quantity);
                 return (
                   <li key={item.productId} className={`flex items-center gap-3 rounded-[10px] border p-3 ${isClearance ? "border-green-600/20 bg-green-600/5" : "border-black/5"}`}>
-                    <span className="text-2xl">{product.icon}</span>
+                    <div className="relative h-12 w-12 shrink-0 rounded-[8px] bg-white overflow-hidden">
+                      {product.image ? (
+                        <Image src={product.image} alt={product.name} fill sizes="48px" className="object-contain p-1" />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-2xl">{product.icon}</span>
+                      )}
+                    </div>
                     <div className="flex-1">
                       <p className="text-sm font-semibold">{product.name}</p>
                       {isClearance && (
