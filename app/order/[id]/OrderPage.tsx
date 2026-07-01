@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getCartProductById, formatQuantity, getQuantityStep, getItemWeightKg } from "@/data/catalog";
 import AddToOrderModal from "@/components/AddToOrderModal";
 import { saveActiveOrder } from "@/components/Header";
@@ -431,7 +432,13 @@ export default function OrderPage() {
             const itemPrice = Math.round(price * item.quantity);
             return (
               <li key={item.productId} className={`flex items-center gap-3 rounded-[10px] border p-3 ${isClearance ? "border-green-600/20 bg-green-600/5" : "border-black/5"}`}>
-                <span className="text-2xl">{product.icon}</span>
+                <div className="relative h-12 w-12 shrink-0 rounded-[8px] bg-white overflow-hidden">
+                  {product.image ? (
+                    <Image src={product.image} alt={product.name} fill sizes="48px" className="object-contain p-1" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-2xl">{product.icon}</span>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold">{product.name}</p>
                   <p className="text-xs text-muted">{price} ₽/{product.unit} · {itemPrice} ₽</p>
