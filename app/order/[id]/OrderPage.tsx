@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -137,6 +137,9 @@ export default function OrderPage() {
   const [saving, setSaving] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [statusNotif, setStatusNotif] = useState<{ label: string; icon: string; color: string } | null>(null);
+  const prevStatusRef = useRef<string | null>(null);
+  const notifTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // editable fields
   const [items, setItems] = useState<OrderItem[]>([]);
@@ -148,6 +151,16 @@ export default function OrderPage() {
     const res = await fetch(`/api/orders/${id}`);
     if (!res.ok) { setLoading(false); return; }
     const data: Order = await res.json();
+    // Detect status change (skip on initial load when prevStatusRef is null)
+    if (prevStatusRef.current !== null && prevStatusRef.current !== data.status) {
+      const info = STATUS_LABELS[data.status];
+      if (info) {
+        if (notifTimerRef.current) clearTimeout(notifTimerRef.current);
+        setStatusNotif(info);
+        notifTimerRef.current = setTimeout(() => setStatusNotif(null), 6000);
+      }
+    }
+    prevStatusRef.current = data.status;
     setOrder(data);
     setItems(data.items);
     setPhone(data.phone);
@@ -303,6 +316,22 @@ export default function OrderPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
+      {/* Status change popup notification */}
+      {statusNotif && (
+        <div
+          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 animate-in fade-in slide-in-from-bottom-4 duration-300"
+          onClick={() => setStatusNotif(null)}
+        >
+          <div className={`flex items-center gap-3 rounded-2xl px-5 py-4 shadow-xl ring-1 ring-black/10 ${statusNotif.color} cursor-pointer`}>
+            <span className="text-2xl">{statusNotif.icon}</span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide opacity-70">Статус заказа изменился</p>
+              <p className="text-base font-bold">{statusNotif.label}</p>
+            </div>
+            <button className="ml-2 text-lg opacity-50 hover:opacity-100">×</button>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
