@@ -14,6 +14,7 @@ export const orders = pgTable("fruktu_lite_orders", {
   comment: text("comment"),
   status: text("status").notNull().default("new"),
   adminChanges: jsonb("admin_changes"),
+  linkedOrderId: uuid("linked_order_id"),
   messengerPlatform: text("messenger_platform"),
   messengerChatId: text("messenger_chat_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

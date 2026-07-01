@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
   sendTelegramMessage,
   buildStatusMessage,
@@ -70,7 +70,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
   const [order] = await db.select().from(orders).where(eq(orders.id, id));
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(order);
+
+  // Find any new orders linked to this one (when this is the assembled order)
+  const linkedOrders = await db
+    .select({ id: orders.id, status: orders.status, estimatedTotal: orders.estimatedTotal, itemsCount: orders.itemsCount, createdAt: orders.createdAt })
+    .from(orders)
+    .where(and(eq(orders.linkedOrderId, id)));
+
+  return NextResponse.json({ ...order, linkedOrders });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

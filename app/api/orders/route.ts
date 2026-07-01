@@ -26,6 +26,16 @@ export async function POST(req: NextRequest) {
     .orderBy(desc(orders.createdAt))
     .limit(1);
 
+  // Ищем неоплаченный собранный заказ того же телефона
+  const [assembledOrder] = await db
+    .select()
+    .from(orders)
+    .where(and(eq(orders.phone, phone), eq(orders.status, "assembled")))
+    .orderBy(desc(orders.createdAt))
+    .limit(1);
+
+  const linkedOrderId = assembledOrder?.paymentStatus !== "paid" ? (assembledOrder?.id ?? null) : null;
+
   const messengerPlatform = prevWithTg ? "telegram" : null;
   const messengerChatId = prevWithTg?.messengerChatId ?? null;
 
@@ -38,6 +48,7 @@ export async function POST(req: NextRequest) {
     comment: comment || null,
     messengerPlatform,
     messengerChatId,
+    linkedOrderId,
   }).returning();
 
   // Уведомляем в Telegram о новом заказе
@@ -55,5 +66,5 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ id: order.id });
+  return NextResponse.json({ id: order.id, linkedOrderId });
 }

@@ -42,6 +42,14 @@ type AdminChangeEvent = {
   entries: AdminChangeEntry[];
 };
 
+type LinkedOrder = {
+  id: string;
+  status: string;
+  estimatedTotal: string;
+  itemsCount: number;
+  createdAt: string;
+};
+
 type Order = {
   id: string;
   items: OrderItem[];
@@ -55,6 +63,8 @@ type Order = {
   comment: string | null;
   status: string;
   adminChanges: AdminChangeEvent[] | null;
+  linkedOrderId: string | null;
+  linkedOrders: LinkedOrder[];
   messengerPlatform: string | null;
   messengerChatId: string | null;
   createdAt: string;
@@ -272,10 +282,12 @@ export default function OrderPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          {["done", "cancelled", "assembled", "delivering"].includes(order.status) ? (
+          {["done", "cancelled", "delivering"].includes(order.status) ? (
             <Link href="/catalog" className="mb-2 inline-block text-sm text-muted hover:text-primary-dark">
               ← В каталог
             </Link>
+          ) : order.status === "assembled" ? (
+            <span className="mb-2 inline-block text-sm text-muted">Заказ ожидает оплаты</span>
           ) : (
             <button
               onClick={() => setShowAddModal(true)}
@@ -299,6 +311,20 @@ export default function OrderPage() {
           <span>Обновлён: {new Date(order.updatedAt).toLocaleString("ru")}</span>
         )}
       </div>
+
+      {/* Linked to assembled order banner */}
+      {order.linkedOrderId && (
+        <div className="mb-6 rounded-[16px] border border-amber-200 bg-amber-50 p-4 text-sm">
+          <p className="font-bold text-amber-800">⚠️ У вас есть неоплаченный собранный заказ</p>
+          <p className="mt-1 text-amber-700">Этот заказ будет доставлен вместе с ним одним рейсом. Оплатить нужно оба.</p>
+          <Link
+            href={`/order/${order.linkedOrderId}`}
+            className="mt-3 inline-block rounded-[10px] bg-amber-500 px-4 py-2 text-sm font-bold text-white"
+          >
+            💳 Перейти к оплате первого заказа
+          </Link>
+        </div>
+      )}
 
       {/* Telegram CTA — prominent, shown for all active orders */}
       {!["done", "cancelled"].includes(order.status) && (
@@ -342,23 +368,54 @@ export default function OrderPage() {
         )
       )}
 
-      {order.status === "assembled" && (
-        <div className="mb-6 rounded-[16px] border border-emerald-200 bg-emerald-50 p-4">
-          <p className="text-sm font-bold text-emerald-700">📦 Заказ собран и готов к оплате!</p>
-          <div className="mt-2 flex flex-wrap gap-4 text-sm text-emerald-700">
+      {order.status === "assembled" && (() => {
+        const thisTotal = Math.round(Number(order.finalTotal ?? order.estimatedTotal));
+        const linkedTotal = (order.linkedOrders ?? []).reduce(
+          (s, o) => s + Math.round(Number(o.estimatedTotal)), 0
+        );
+        const grandTotal = thisTotal + linkedTotal;
+        const hasLinked = (order.linkedOrders ?? []).length > 0;
+        return (
+          <div className="mb-6 rounded-[16px] border border-emerald-200 bg-emerald-50 p-4">
+            <p className="font-bold text-emerald-700">📦 Заказ собран и готов к оплате!</p>
             {order.finalWeight && (
-              <span>⚖️ Точный вес: <b>{Math.round(Number(order.finalWeight) * 10) / 10} кг</b></span>
+              <p className="mt-1 text-sm text-emerald-700">⚖️ Точный вес: <b>{Math.round(Number(order.finalWeight) * 10) / 10} кг</b></p>
             )}
-            <span>💰 Итоговая сумма: <b>{Math.round(Number(order.finalTotal ?? order.estimatedTotal))} ₽</b></span>
+            {hasLinked ? (
+              <div className="mt-2 rounded-[10px] border border-emerald-300 bg-white p-3">
+                <p className="text-xs font-bold text-emerald-700 mb-2">🛒 К этому заказу привязан ещё один:</p>
+                <div className="flex flex-col gap-1 text-sm text-muted mb-2">
+                  <div className="flex justify-between">
+                    <span>Заказ №1 (этот)</span>
+                    <span className="font-semibold">{thisTotal} ₽</span>
+                  </div>
+                  {(order.linkedOrders ?? []).map((lo) => (
+                    <div key={lo.id} className="flex justify-between">
+                      <Link href={`/order/${lo.id}`} className="text-primary-dark hover:underline">
+                        Заказ №2 ({lo.itemsCount} поз.) →
+                      </Link>
+                      <span className="font-semibold">~{Math.round(Number(lo.estimatedTotal))} ₽</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between border-t border-black/5 pt-1 font-bold text-foreground">
+                    <span>Итого за оба заказа</span>
+                    <span>{grandTotal} ₽</span>
+                  </div>
+                </div>
+                <p className="text-xs text-emerald-700">Доставка одним рейсом — бесплатно</p>
+              </div>
+            ) : (
+              <p className="mt-1 text-sm text-emerald-700">💰 Итоговая сумма: <b>{thisTotal} ₽</b></p>
+            )}
+            <Link
+              href={`/order/${order.id}/pay`}
+              className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] bg-emerald-600 py-3 text-base font-bold text-white"
+            >
+              💳 Оплатить {grandTotal} ₽
+            </Link>
           </div>
-          <Link
-            href={`/order/${order.id}/pay`}
-            className="mt-3 inline-block rounded-[10px] bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white"
-          >
-            💳 Оплатить {Math.round(Number(order.finalTotal ?? order.estimatedTotal))} ₽
-          </Link>
-        </div>
-      )}
+        );
+      })()}
 
       {!["done", "cancelled", "assembled", "delivering"].includes(order.status) && (
         <div className="mb-6 rounded-[16px] border border-primary/20 bg-primary/5 p-4 text-sm text-primary-dark">
