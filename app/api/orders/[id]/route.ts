@@ -35,6 +35,8 @@ function computeTotal(items: OrderItem[]): number {
   }, 0);
 }
 
+function r1(n: number) { return Math.round(n * 10) / 10; }
+
 function computeDiff(prev: OrderItem[], next: OrderItem[]): AdminChangeEntry[] {
   const entries: AdminChangeEntry[] = [];
   const prevMap = new Map(prev.map((i) => [i.productId, i.quantity]));
@@ -45,11 +47,11 @@ function computeDiff(prev: OrderItem[], next: OrderItem[]): AdminChangeEntry[] {
     const name = catalog?.product.name ?? productId;
     const unit = catalog?.product.unit ?? "";
     if (!prevMap.has(productId)) {
-      entries.push({ kind: "added", productId, productName: name, unit, to: nextQty });
+      entries.push({ kind: "added", productId, productName: name, unit, to: r1(nextQty) });
     } else {
       const prevQty = prevMap.get(productId)!;
       if (Math.abs(prevQty - nextQty) > 0.001) {
-        entries.push({ kind: "qty_changed", productId, productName: name, unit, from: prevQty, to: nextQty });
+        entries.push({ kind: "qty_changed", productId, productName: name, unit, from: r1(prevQty), to: r1(nextQty) });
       }
     }
   }
@@ -58,7 +60,7 @@ function computeDiff(prev: OrderItem[], next: OrderItem[]): AdminChangeEntry[] {
       const catalog = getCartProductById(productId);
       const name = catalog?.product.name ?? productId;
       const unit = catalog?.product.unit ?? "";
-      entries.push({ kind: "removed", productId, productName: name, unit, from: prevQty });
+      entries.push({ kind: "removed", productId, productName: name, unit, from: r1(prevQty) });
     }
   }
   return entries;
