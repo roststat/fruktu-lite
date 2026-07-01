@@ -3,6 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { type Order } from "@/lib/db/schema";
+
+// Highlight linked (supplementary) orders prominently
+function LinkedOrderBadge({ orderId }: { orderId: string }) {
+  return (
+    <div className="mb-2 flex items-center gap-2 rounded-[10px] border border-orange-300 bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700">
+      <span>🔗</span>
+      <span>Дополнение к заказу</span>
+      <Link href={`/order/${orderId}`} className="ml-auto text-xs font-semibold text-primary-dark underline hover:no-underline">
+        Открыть основной
+      </Link>
+    </div>
+  );
+}
 import { getCartProductById, formatQuantity, isWeightProduct } from "@/data/catalog";
 import AdminCatalogPicker from "./AdminCatalogPicker";
 
@@ -208,7 +221,8 @@ function OrderRow({ order, onUpdate }: { order: Order; onUpdate: (o: Order) => v
   };
 
   return (
-    <div className="rounded-[16px] border border-black/5 bg-white p-4">
+    <div className={`rounded-[16px] border p-4 ${order.linkedOrderId ? "border-orange-300 bg-orange-50/40" : "border-black/5 bg-white"}`}>
+      {order.linkedOrderId && <LinkedOrderBadge orderId={order.linkedOrderId} />}
       {/* Header row */}
       <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
         <div>

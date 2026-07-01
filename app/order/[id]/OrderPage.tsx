@@ -46,6 +46,9 @@ type LinkedOrder = {
   id: string;
   status: string;
   estimatedTotal: string;
+  finalTotal: string | null;
+  finalWeight: string | null;
+  items: OrderItem[];
   itemsCount: number;
   createdAt: string;
 };
@@ -210,8 +213,34 @@ export default function OrderPage() {
     setEditing(false);
   };
 
+  const handleAddLinkedOrder = async (newItems: OrderItem[]) => {
+    if (!order) return;
+    const total = newItems.reduce((sum, item) => {
+      const entry = getCartProductById(item.productId);
+      return entry ? sum + Math.round(entry.price * item.quantity) : sum;
+    }, 0);
+    await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: newItems,
+        itemsCount: newItems.length,
+        estimatedTotal: total,
+        phone: order.phone,
+        address: order.address,
+        comment: order.comment,
+        linkedOrderId: order.id,
+      }),
+    });
+    await load();
+  };
+
   const handleAddItems = async (newItems: OrderItem[]) => {
     if (!order) return;
+    if (order.status === "assembled") {
+      await handleAddLinkedOrder(newItems);
+      return;
+    }
     const merged = [...order.items];
     for (const newItem of newItems) {
       const idx = merged.findIndex((i) => i.productId === newItem.productId);
@@ -225,15 +254,10 @@ export default function OrderPage() {
       const entry = getCartProductById(item.productId);
       return entry ? sum + Math.round(entry.price * item.quantity) : sum;
     }, 0);
-
     await fetch(`/api/orders/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: merged,
-        itemsCount: merged.length,
-        estimatedTotal: mergedTotal,
-      }),
+      body: JSON.stringify({ items: merged, itemsCount: merged.length, estimatedTotal: mergedTotal }),
     });
     await load();
   };
@@ -369,50 +393,80 @@ export default function OrderPage() {
       )}
 
       {order.status === "assembled" && (() => {
+        const linked = order.linkedOrders ?? [];
         const thisTotal = Math.round(Number(order.finalTotal ?? order.estimatedTotal));
-        const linkedTotal = (order.linkedOrders ?? []).reduce(
-          (s, o) => s + Math.round(Number(o.estimatedTotal)), 0
-        );
-        const grandTotal = thisTotal + linkedTotal;
-        const hasLinked = (order.linkedOrders ?? []).length > 0;
+        const linkedAssembledTotal = linked
+          .filter((lo) => lo.status === "assembled")
+          .reduce((s, lo) => s + Math.round(Number(lo.finalTotal ?? lo.estimatedTotal)), 0);
+        const grandTotal = thisTotal + linkedAssembledTotal;
+        const allAssembled = linked.every((lo) => lo.status === "assembled");
+        const readyToPay = linked.length === 0 || allAssembled;
         return (
           <div className="mb-6 rounded-[16px] border border-emerald-200 bg-emerald-50 p-4">
             <p className="font-bold text-emerald-700">📦 Заказ собран и готов к оплате!</p>
             {order.finalWeight && (
               <p className="mt-1 text-sm text-emerald-700">⚖️ Точный вес: <b>{Math.round(Number(order.finalWeight) * 10) / 10} кг</b></p>
             )}
-            {hasLinked ? (
-              <div className="mt-2 rounded-[10px] border border-emerald-300 bg-white p-3">
-                <p className="text-xs font-bold text-emerald-700 mb-2">🛒 К этому заказу привязан ещё один:</p>
-                <div className="flex flex-col gap-1 text-sm text-muted mb-2">
+
+            {linked.length > 0 && (
+              <div className="mt-3 rounded-[10px] border border-emerald-300 bg-white p-3">
+                <div className="flex flex-col gap-1.5 text-sm">
                   <div className="flex justify-between">
-                    <span>Заказ №1 (этот)</span>
+                    <span className="text-muted">Часть 1 (этот заказ)</span>
                     <span className="font-semibold">{thisTotal} ₽</span>
                   </div>
-                  {(order.linkedOrders ?? []).map((lo) => (
-                    <div key={lo.id} className="flex justify-between">
-                      <Link href={`/order/${lo.id}`} className="text-primary-dark hover:underline">
-                        Заказ №2 ({lo.itemsCount} поз.) →
-                      </Link>
-                      <span className="font-semibold">~{Math.round(Number(lo.estimatedTotal))} ₽</span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between border-t border-black/5 pt-1 font-bold text-foreground">
-                    <span>Итого за оба заказа</span>
+                  {linked.map((lo, i) => {
+                    const loTotal = Math.round(Number(lo.finalTotal ?? lo.estimatedTotal));
+                    const loAssembled = lo.status === "assembled";
+                    return (
+                      <div key={lo.id} className="flex items-center justify-between">
+                        <span className="text-muted flex items-center gap-1.5">
+                          Часть {i + 2} ({lo.itemsCount} поз.)
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${loAssembled ? "bg-emerald-100 text-emerald-700" : "bg-orange-100 text-orange-700"}`}>
+                            {loAssembled ? "Собрана" : "Собирается"}
+                          </span>
+                        </span>
+                        <span className={`font-semibold ${loAssembled ? "" : "text-muted"}`}>
+                          {loAssembled ? "" : "~"}{loTotal} ₽
+                        </span>
+                      </div>
+                    );
+                  })}
+                  <div className="flex justify-between border-t border-black/10 pt-1.5 font-bold text-foreground">
+                    <span>Итого{!allAssembled ? " (пока)" : ""}</span>
                     <span>{grandTotal} ₽</span>
                   </div>
                 </div>
-                <p className="text-xs text-emerald-700">Доставка одним рейсом — бесплатно</p>
+                {!allAssembled && (
+                  <p className="mt-2 text-xs text-orange-600">⏳ Ждём когда соберут все части — тогда откроется оплата</p>
+                )}
+                <p className="mt-1 text-xs text-emerald-700">🚚 Доставка всех частей одним рейсом</p>
               </div>
-            ) : (
+            )}
+
+            {linked.length === 0 && (
               <p className="mt-1 text-sm text-emerald-700">💰 Итоговая сумма: <b>{thisTotal} ₽</b></p>
             )}
-            <Link
-              href={`/order/${order.id}/pay`}
-              className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] bg-emerald-600 py-3 text-base font-bold text-white"
+
+            {readyToPay ? (
+              <Link
+                href={`/order/${order.id}/pay`}
+                className="mt-3 inline-flex w-full items-center justify-center rounded-[12px] bg-emerald-600 py-3 text-base font-bold text-white"
+              >
+                💳 Оплатить {grandTotal} ₽
+              </Link>
+            ) : (
+              <div className="mt-3 w-full rounded-[12px] bg-black/10 py-3 text-center text-sm font-bold text-muted">
+                Оплата откроется когда все части собраны
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="mt-2 w-full rounded-[12px] border border-emerald-300 bg-white py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
             >
-              💳 Оплатить {grandTotal} ₽
-            </Link>
+              ➕ Добавить ещё товары (доставим вместе)
+            </button>
           </div>
         );
       })()}
@@ -426,19 +480,6 @@ export default function OrderPage() {
           >
             ➕ Добавить к заказу
           </button>
-        </div>
-      )}
-
-      {order.status === "assembled" && (
-        <div className="mb-6 rounded-[16px] border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-          <p className="font-bold">🛒 Хотите добавить ещё товары?</p>
-          <p className="mt-1">Оформите новый заказ — доставим вместе с этим бесплатно, одним рейсом.</p>
-          <Link
-            href="/catalog"
-            className="mt-3 inline-block rounded-[10px] bg-blue-600 px-4 py-2 text-sm font-bold text-white"
-          >
-            Оформить ещё один заказ
-          </Link>
         </div>
       )}
 

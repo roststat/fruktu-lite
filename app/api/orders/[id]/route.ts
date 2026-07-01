@@ -73,9 +73,18 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   // Find any new orders linked to this one (when this is the assembled order)
   const linkedOrders = await db
-    .select({ id: orders.id, status: orders.status, estimatedTotal: orders.estimatedTotal, itemsCount: orders.itemsCount, createdAt: orders.createdAt })
+    .select({
+      id: orders.id,
+      status: orders.status,
+      estimatedTotal: orders.estimatedTotal,
+      finalTotal: orders.finalTotal,
+      finalWeight: orders.finalWeight,
+      items: orders.items,
+      itemsCount: orders.itemsCount,
+      createdAt: orders.createdAt,
+    })
     .from(orders)
-    .where(and(eq(orders.linkedOrderId, id)));
+    .where(eq(orders.linkedOrderId, id));
 
   return NextResponse.json({ ...order, linkedOrders });
 }
