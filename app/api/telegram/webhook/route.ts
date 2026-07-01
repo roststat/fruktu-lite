@@ -82,29 +82,20 @@ export async function POST(request: Request) {
     .set({ messengerPlatform: "telegram", messengerChatId: String(chatId), updatedAt: new Date() })
     .where(eq(orders.id, orderId));
 
-  // Отправляем приветствие с актуальным статусом
-  const { text: connectedText } = buildConnectedMessage(
-    order.id,
-    order.items as { productId: string; quantity: number }[],
-    order.estimatedTotal,
-    order.status
+  const items = order.items as { productId: string; quantity: number }[];
+  const { text: connectedText, buttons: connectedButtons } = buildConnectedMessage(
+    order.id, items, order.estimatedTotal, order.status, order.finalTotal, order.finalWeight
   );
 
-  // Для финальных статусов сразу шлём правильное сообщение со статусом
+  // Для завершённых/активных статусов шлём приветствие + отдельное статусное сообщение
   if (["assembled", "delivering", "done", "cancelled"].includes(order.status)) {
     const { text: statusText, buttons: statusButtons } = buildStatusMessage(
-      order.id,
-      order.status,
-      order.items as { productId: string; quantity: number }[],
-      order.estimatedTotal,
-      order.finalWeight,
-      order.finalTotal
+      order.id, order.status, items, order.estimatedTotal, order.finalWeight, order.finalTotal
     );
     await sendTelegramMessage(chatId, connectedText);
     await sendTelegramMessage(chatId, statusText, statusButtons);
   } else {
-    const { buttons } = buildConnectedMessage(order.id, order.items as { productId: string; quantity: number }[], order.estimatedTotal, order.status);
-    await sendTelegramMessage(chatId, connectedText, buttons);
+    await sendTelegramMessage(chatId, connectedText, connectedButtons);
   }
 
   return Response.json({ ok: true });

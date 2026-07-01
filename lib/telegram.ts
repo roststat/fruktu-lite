@@ -84,15 +84,20 @@ export function buildConnectedMessage(
   orderId: string,
   items: OrderItem[],
   estimatedTotal: string | number,
-  status: string
+  status: string,
+  finalTotal?: string | null,
+  finalWeight?: string | null,
 ): { text: string; buttons: InlineButton[][] } {
   const statusLabel = STATUS_LABELS[status] ?? status;
   const weight = Math.round(calcOrderWeight(items) * 10) / 10;
+  const isFinal = !!finalTotal;
+  const displayTotal = isFinal ? Math.round(Number(finalTotal)) : Math.round(Number(estimatedTotal));
+  const fw = finalWeight ? `${Math.round(Number(finalWeight) * 10) / 10} кг` : `~${weight} кг`;
   const text =
     `✅ <b>Telegram подключён к заказу!</b>\n\n` +
     `<b>📋 Состав заказа:</b>\n${buildOrderItemsText(items)}\n\n` +
-    `⚖️ Примерный вес: ~${weight} кг\n` +
-    `💰 Примерная сумма: <b>~${Math.round(Number(estimatedTotal))} ₽</b>\n` +
+    `⚖️ ${isFinal ? "Точный вес" : "Примерный вес"}: ${isFinal ? fw : `~${weight} кг`}\n` +
+    `💰 ${isFinal ? "Итоговая сумма" : "Примерная сумма"}: <b>${isFinal ? "" : "~"}${displayTotal} ₽</b>\n` +
     `📦 Статус: <b>${statusLabel}</b>\n\n` +
     `Пришлём уведомление при каждом изменении статуса.`;
   return { text, buttons: orderButtons(orderId) };
@@ -134,6 +139,15 @@ export function buildStatusMessage(
       `💰 Итоговая сумма к оплате: <b>${Math.round(Number(finalTotal))} ₽</b>\n\n` +
       `Нажмите кнопку ниже, чтобы оплатить заказ.`;
     return { text, buttons: paymentButtons(orderId) };
+  }
+
+  if (status === "delivering") {
+    const total = finalTotal ?? estimatedTotal;
+    const text =
+      `🚚 <b>Заказ доставляется!</b>\n\n` +
+      `💰 Сумма к оплате: <b>${Math.round(Number(total))} ₽</b>\n\n` +
+      `Курьер уже едет к вам. Ждите!`;
+    return { text, buttons: [[{ text: "🔗 Открыть заказ", url: `${SITE_URL}/order/${orderId}` }]] };
   }
 
   if (status === "done") {
