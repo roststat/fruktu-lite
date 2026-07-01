@@ -14,12 +14,13 @@ const DELIVERY_COST = 300;
 const FREE_DELIVERY_WEIGHT_LIMIT = 15;
 
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: string }> = {
-  new:        { label: "Новый",         color: "bg-blue-100 text-blue-700",   icon: "🆕" },
+  new:        { label: "Новый",         color: "bg-blue-100 text-blue-700",     icon: "🆕" },
   confirmed:  { label: "Подтверждён",   color: "bg-yellow-100 text-yellow-700", icon: "✅" },
   assembling: { label: "Собирается",    color: "bg-orange-100 text-orange-700", icon: "🧺" },
+  assembled:  { label: "Собран",        color: "bg-emerald-100 text-emerald-700", icon: "📦" },
   delivering: { label: "Доставляется",  color: "bg-purple-100 text-purple-700", icon: "🚚" },
-  done:       { label: "Выполнен",      color: "bg-green-100 text-green-700",  icon: "🎉" },
-  cancelled:  { label: "Отменён",       color: "bg-red-100 text-red-700",     icon: "❌" },
+  done:       { label: "Выполнен",      color: "bg-green-100 text-green-700",   icon: "🎉" },
+  cancelled:  { label: "Отменён",       color: "bg-red-100 text-red-700",       icon: "❌" },
 };
 
 type OrderItem = { productId: string; quantity: number };
@@ -29,6 +30,9 @@ type Order = {
   items: OrderItem[];
   itemsCount: number;
   estimatedTotal: string;
+  finalWeight: string | null;
+  finalTotal: string | null;
+  paymentStatus: string | null;
   phone: string;
   address: string;
   comment: string | null;
@@ -87,7 +91,10 @@ export default function OrderPage() {
     return entry ? sum + getItemWeightKg(entry.product, item.quantity) : sum;
   }, 0);
   const isOverWeightLimit = totalWeight > FREE_DELIVERY_WEIGHT_LIMIT;
-  const goodsTotal = editing ? computedTotal : Math.round(Number(order?.estimatedTotal ?? 0));
+  const hasFinal = order?.finalTotal != null;
+  const goodsTotal = hasFinal
+    ? Math.round(Number(order!.finalTotal))
+    : editing ? computedTotal : Math.round(Number(order?.estimatedTotal ?? 0));
   const deliveryCost =
     items.length === 0 ? 0
     : isOverWeightLimit ? DELIVERY_COST
@@ -214,9 +221,25 @@ export default function OrderPage() {
         )}
       </div>
 
-      {!["done", "cancelled"].includes(order.status) && (
+      {order.status === "assembled" && order.finalTotal && (
+        <div className="mb-6 rounded-[16px] border border-emerald-200 bg-emerald-50 p-4">
+          <p className="text-sm font-bold text-emerald-700">📦 Заказ собран и готов к оплате!</p>
+          <div className="mt-2 flex flex-wrap gap-4 text-sm text-emerald-700">
+            <span>⚖️ Точный вес: <b>{Math.round(Number(order.finalWeight) * 10) / 10} кг</b></span>
+            <span>💰 Итого: <b>{Math.round(Number(order.finalTotal))} ₽</b></span>
+          </div>
+          <Link
+            href={`/order/${order.id}/pay`}
+            className="mt-3 inline-block rounded-[10px] bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white"
+          >
+            💳 Оплатить {Math.round(Number(order.finalTotal))} ₽
+          </Link>
+        </div>
+      )}
+
+      {!["done", "cancelled", "assembled"].includes(order.status) && (
         <div className="mb-6 rounded-[16px] border border-primary/20 bg-primary/5 p-4 text-sm text-primary-dark">
-          <p>Мы начали собирать ваш заказ. После смены статуса на «Собран» появится окончательная стоимость заказа, и можно будет оплатить онлайн.</p>
+          <p>Мы начали собирать ваш заказ. После сборки появится окончательная стоимость и кнопка оплаты.</p>
           <button
             onClick={() => setShowAddModal(true)}
             className="mt-3 rounded-[10px] bg-primary px-4 py-2 text-sm font-bold text-white"
