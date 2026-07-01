@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getCartProductById, formatQuantity, getQuantityStep, getItemWeightKg } from "@/data/catalog";
 import AddToOrderModal from "@/components/AddToOrderModal";
+import { saveActiveOrder } from "@/components/Header";
 
 const round = (n: number) => Math.round(n * 10) / 10;
 
@@ -68,6 +69,12 @@ export default function OrderPage() {
   }, [id]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Save/clear active order in localStorage so catalog can show the "заказ в работе" banner
+  useEffect(() => {
+    if (!order) return;
+    saveActiveOrder({ id: order.id, status: order.status });
+  }, [order?.id, order?.status]);
 
   const computedTotal = items.reduce((sum, item) => {
     const entry = getCartProductById(item.productId);
@@ -179,9 +186,18 @@ export default function OrderPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <Link href="/catalog" className="mb-2 inline-block text-sm text-muted hover:text-primary-dark">
-            ← В каталог
-          </Link>
+          {["done", "cancelled"].includes(order.status) ? (
+            <Link href="/catalog" className="mb-2 inline-block text-sm text-muted hover:text-primary-dark">
+              ← В каталог
+            </Link>
+          ) : (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="mb-2 inline-block text-sm font-semibold text-primary-dark hover:underline"
+            >
+              ← Добавить товар из каталога
+            </button>
+          )}
           <h1 className="text-2xl font-extrabold text-foreground">Заказ</h1>
           <p className="mt-0.5 font-mono text-xs text-muted">{order.id}</p>
         </div>

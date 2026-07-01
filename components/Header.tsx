@@ -8,11 +8,34 @@ import CategoryMenu from "./CategoryMenu";
 import DeliveryZoneModal from "./DeliveryZoneModal";
 import LogoIcon from "./LogoIcon";
 
+export type ActiveOrderInfo = { id: string; status: string };
+
+export function saveActiveOrder(info: ActiveOrderInfo | null) {
+  if (info && !["done", "cancelled"].includes(info.status)) {
+    localStorage.setItem("fruktu_active_order", JSON.stringify(info));
+  } else {
+    localStorage.removeItem("fruktu_active_order");
+  }
+}
+
+function useActiveOrder(isOrderPage: boolean) {
+  const [activeOrder, setActiveOrder] = useState<ActiveOrderInfo | null>(null);
+  useEffect(() => {
+    if (isOrderPage) return;
+    try {
+      const raw = localStorage.getItem("fruktu_active_order");
+      setActiveOrder(raw ? JSON.parse(raw) : null);
+    } catch { setActiveOrder(null); }
+  }, [isOrderPage]);
+  return activeOrder;
+}
+
 export default function Header() {
   const [zoneOpen, setZoneOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
   const isOrderPage = pathname?.startsWith("/order/");
+  const activeOrder = useActiveOrder(isOrderPage);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -65,6 +88,16 @@ export default function Header() {
             </a>
           </div>
         </div>
+
+        {!isOrderPage && activeOrder && (
+          <Link
+            href={`/order/${activeOrder.id}`}
+            className="flex items-center justify-between gap-2 rounded-[10px] bg-primary/10 px-3 py-2 text-sm font-semibold text-primary-dark hover:bg-primary/20"
+          >
+            <span>🧺 Заказ в работе — вернуться к заказу</span>
+            <span aria-hidden>→</span>
+          </Link>
+        )}
 
         {!isOrderPage && (
           <div className="flex items-center gap-2">
