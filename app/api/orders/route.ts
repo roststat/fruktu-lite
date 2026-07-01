@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { orders } from "@/lib/db/schema";
+import { eq, and, isNotNull, desc } from "drizzle-orm";
+import { sendTelegramMessage, buildConnectedMessage } from "@/lib/telegram";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -10,6 +12,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Ищем предыдущий заказ этого телефона с привязанным Telegram
+  const [prevWithTg] = await db
+    .select()
+    .from(orders)
+    .where(
+      and(
+        eq(orders.phone, phone),
+        eq(orders.messengerPlatform, "telegram"),
+        isNotNull(orders.messengerChatId)
+      )
+    )
+    .orderBy(desc(orders.createdAt))
+    .limit(1);
+
+  const messengerPlatform = prevWithTg ? "telegram" : null;
+  const messengerChatId = prevWithTg?.messengerChatId ?? null;
+
   const [order] = await db.insert(orders).values({
     items,
     itemsCount,
@@ -17,7 +36,24 @@ export async function POST(req: NextRequest) {
     phone,
     address,
     comment: comment || null,
+    messengerPlatform,
+    messengerChatId,
   }).returning();
+
+  // Уведомляем в Telegram о новом заказе
+  if (messengerChatId) {
+    const { text, buttons } = buildConnectedMessage(
+      order.id,
+      order.items as { productId: string; quantity: number }[],
+      order.estimatedTotal,
+      order.status
+    );
+    await sendTelegramMessage(
+      messengerChatId,
+      `🛒 <b>Новый заказ создан!</b>\n\n${text}`,
+      buttons
+    );
+  }
 
   return NextResponse.json({ id: order.id });
 }
