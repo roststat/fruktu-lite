@@ -13,6 +13,7 @@ export const orders = pgTable("fruktu_lite_orders", {
   address: text("address").notNull(),
   comment: text("comment"),
   status: text("status").notNull().default("new"),
+  adminChanges: jsonb("admin_changes"),
   messengerPlatform: text("messenger_platform"),
   messengerChatId: text("messenger_chat_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
