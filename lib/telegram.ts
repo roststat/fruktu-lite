@@ -147,9 +147,12 @@ export function buildStatusMessage(
   }
 
   const weight = Math.round(calcOrderWeight(items) * 10) / 10;
+  const isAssembled = status === "assembled";
+  const displayTotal = finalTotal ?? estimatedTotal;
+  const fw = finalWeight ? `${Math.round(Number(finalWeight) * 10) / 10} кг` : `~${weight} кг`;
   const text =
     `📦 Статус заказа изменился: <b>${statusLabel}</b>\n\n` +
-    `⚖️ Примерный вес: ~${weight} кг\n` +
-    `💰 Примерная сумма: <b>~${Math.round(Number(estimatedTotal))} ₽</b>`;
-  return { text, buttons: orderButtons(orderId) };
+    `⚖️ ${isAssembled ? "Точный вес" : "Примерный вес"}: ${isAssembled && finalWeight ? fw : `~${weight} кг`}\n` +
+    `💰 ${isAssembled ? "Итоговая сумма" : "Примерная сумма"}: <b>${isAssembled ? "" : "~"}${Math.round(Number(displayTotal))} ₽</b>`;
+  return { text, buttons: isAssembled ? paymentButtons(orderId) : orderButtons(orderId) };
 }
