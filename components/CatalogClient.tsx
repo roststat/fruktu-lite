@@ -160,17 +160,38 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
         categories.map((cat) => {
           const catProducts = filtered.filter((p) => productMatchesCategory(p, cat.id));
           if (catProducts.length === 0) return null;
+          const subs = cat.subcategories ?? [];
           return (
-            <div key={cat.id} className="mb-8">
-              <h2 className="mb-3 flex items-center gap-2 text-lg font-extrabold text-foreground">
+            <div key={cat.id} className="mb-14">
+              <h2 className="mb-4 flex items-center gap-2 text-xl font-extrabold text-foreground border-b border-black/8 pb-2">
                 <span>{cat.icon}</span>
                 <span>{cat.name}</span>
               </h2>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {catProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              {subs.length > 0 ? (
+                subs.map((sub) => {
+                  const subProducts = catProducts.filter((p) => productMatchesCategory(p, sub.id));
+                  if (subProducts.length === 0) return null;
+                  return (
+                    <div key={sub.id} className="mb-8">
+                      <h3 className="mb-3 flex items-center gap-1.5 text-sm font-bold text-muted uppercase tracking-wide">
+                        <span>{sub.icon}</span>
+                        <span>{sub.name}</span>
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                        {subProducts.map((product) => (
+                          <ProductCard key={product.id} product={product} />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                  {catProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })
