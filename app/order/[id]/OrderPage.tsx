@@ -375,51 +375,6 @@ export default function OrderPage() {
         )}
       </section>
 
-      {/* Admin changes history */}
-      {order.adminChanges && order.adminChanges.length > 0 && (
-        <section className="mb-6 rounded-[16px] border border-amber-200 bg-amber-50 p-4">
-          <h2 className="mb-3 font-bold text-amber-800">📋 Корректировки в заказе</h2>
-          <div className="flex flex-col gap-4">
-            {[...order.adminChanges].reverse().map((event, i) => {
-              const totalDiff = event.newTotal - event.prevTotal;
-              return (
-                <div key={i} className="rounded-[12px] bg-white border border-amber-100 p-3">
-                  <p className="mb-2 text-xs text-amber-700 font-semibold">
-                    {new Date(event.ts).toLocaleString("ru")}
-                    {totalDiff !== 0 && (
-                      <span className={`ml-2 font-bold ${totalDiff > 0 ? "text-emerald-600" : "text-red-500"}`}>
-                        {totalDiff > 0 ? "+" : ""}{totalDiff} ₽ ({event.prevTotal} → {event.newTotal} ₽)
-                      </span>
-                    )}
-                  </p>
-                  <ul className="flex flex-col gap-1">
-                    {event.entries.map((e, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm">
-                        {e.kind === "added" && <span className="mt-0.5 shrink-0 text-emerald-600">➕</span>}
-                        {e.kind === "removed" && <span className="mt-0.5 shrink-0 text-red-500">➖</span>}
-                        {e.kind === "qty_changed" && <span className="mt-0.5 shrink-0 text-blue-600">✏️</span>}
-                        <span>
-                          <span className="font-semibold">{e.productName}</span>
-                          {e.kind === "added" && (
-                            <span className="text-muted"> — добавлен ({e.to} {e.unit})</span>
-                          )}
-                          {e.kind === "removed" && (
-                            <span className="text-muted"> — убран из заказа</span>
-                          )}
-                          {e.kind === "qty_changed" && (
-                            <span className="text-muted"> — количество: {e.from} → {e.to} {e.unit}</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
       {/* Items */}
       <section className="mb-6 rounded-[16px] border border-black/5 bg-white p-4">
         <h2 className="mb-3 font-bold">Состав заказа</h2>
@@ -465,6 +420,51 @@ export default function OrderPage() {
           })}
         </ul>
       </section>
+
+      {/* Admin changes history */}
+      {order.adminChanges && order.adminChanges.length > 0 && (
+        <section className="mb-6 rounded-[16px] border border-amber-200 bg-amber-50 p-4">
+          <h2 className="mb-3 font-bold text-amber-800">📋 Корректировки в заказе</h2>
+          <div className="flex flex-col gap-4">
+            {[...order.adminChanges].reverse().map((event, i) => {
+              const totalDiff = event.newTotal - event.prevTotal;
+              return (
+                <div key={i} className="rounded-[12px] bg-white border border-amber-100 p-3">
+                  <p className="mb-2 text-xs text-amber-700 font-semibold">
+                    {new Date(event.ts).toLocaleString("ru")}
+                    {totalDiff !== 0 && (
+                      <span className={`ml-2 font-bold ${totalDiff > 0 ? "text-emerald-600" : "text-red-500"}`}>
+                        {totalDiff > 0 ? "+" : ""}{totalDiff} ₽ ({event.prevTotal} → {event.newTotal} ₽)
+                      </span>
+                    )}
+                  </p>
+                  <ul className="flex flex-col gap-1">
+                    {event.entries.map((e, j) => (
+                      <li key={j} className="flex items-start gap-2 text-sm">
+                        {e.kind === "added" && <span className="mt-0.5 shrink-0 text-emerald-600">➕</span>}
+                        {e.kind === "removed" && <span className="mt-0.5 shrink-0 text-red-500">➖</span>}
+                        {e.kind === "qty_changed" && <span className="mt-0.5 shrink-0 text-blue-600">✏️</span>}
+                        <span>
+                          <span className="font-semibold">{e.productName}</span>
+                          {e.kind === "added" && (
+                            <span className="text-muted"> — добавлен ({e.to} {e.unit})</span>
+                          )}
+                          {e.kind === "removed" && (
+                            <span className="text-muted"> — убран из заказа</span>
+                          )}
+                          {e.kind === "qty_changed" && (
+                            <span className="text-muted"> — количество: {e.from} → {e.to} {e.unit}</span>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Totals */}
       <section className="mb-6 rounded-[16px] border border-black/5 bg-white p-4">
