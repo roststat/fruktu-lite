@@ -378,7 +378,7 @@ export default function OrderPage() {
       {/* Admin changes history */}
       {order.adminChanges && order.adminChanges.length > 0 && (
         <section className="mb-6 rounded-[16px] border border-amber-200 bg-amber-50 p-4">
-          <h2 className="mb-3 font-bold text-amber-800">📋 Изменения менеджера</h2>
+          <h2 className="mb-3 font-bold text-amber-800">📋 Корректировки в заказе</h2>
           <div className="flex flex-col gap-4">
             {[...order.adminChanges].reverse().map((event, i) => {
               const totalDiff = event.newTotal - event.prevTotal;
