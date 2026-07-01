@@ -360,7 +360,7 @@ export default function OrderPage() {
         </div>
       )}
 
-      {!["done", "cancelled", "assembled"].includes(order.status) && (
+      {!["done", "cancelled", "assembled", "delivering"].includes(order.status) && (
         <div className="mb-6 rounded-[16px] border border-primary/20 bg-primary/5 p-4 text-sm text-primary-dark">
           <p>Мы начали собирать ваш заказ. После сборки появится окончательная стоимость и кнопка оплаты.</p>
           <button
@@ -369,6 +369,32 @@ export default function OrderPage() {
           >
             ➕ Добавить к заказу
           </button>
+        </div>
+      )}
+
+      {order.status === "assembled" && (
+        <div className="mb-6 rounded-[16px] border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+          <p className="font-bold">🛒 Хотите добавить ещё товары?</p>
+          <p className="mt-1">Оформите новый заказ — доставим вместе с этим бесплатно, одним рейсом.</p>
+          <Link
+            href="/catalog"
+            className="mt-3 inline-block rounded-[10px] bg-blue-600 px-4 py-2 text-sm font-bold text-white"
+          >
+            Оформить ещё один заказ
+          </Link>
+        </div>
+      )}
+
+      {order.status === "delivering" && (
+        <div className="mb-6 rounded-[16px] border border-orange-200 bg-orange-50 p-4 text-sm text-orange-800">
+          <p className="font-bold">🚚 Заказ уже едет к вам!</p>
+          <p className="mt-1">Добавить товары в этот заказ уже нельзя. Можно оформить новый — доставим отдельным рейсом.</p>
+          <Link
+            href="/catalog"
+            className="mt-3 inline-block rounded-[10px] bg-orange-500 px-4 py-2 text-sm font-bold text-white"
+          >
+            Оформить новый заказ
+          </Link>
         </div>
       )}
 
