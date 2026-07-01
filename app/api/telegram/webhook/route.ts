@@ -82,13 +82,30 @@ export async function POST(request: Request) {
     .set({ messengerPlatform: "telegram", messengerChatId: String(chatId), updatedAt: new Date() })
     .where(eq(orders.id, orderId));
 
-  const { text: msg, buttons } = buildConnectedMessage(
+  // Отправляем приветствие с актуальным статусом
+  const { text: connectedText } = buildConnectedMessage(
     order.id,
     order.items as { productId: string; quantity: number }[],
     order.estimatedTotal,
     order.status
   );
-  await sendTelegramMessage(chatId, msg, buttons);
+
+  // Для финальных статусов сразу шлём правильное сообщение со статусом
+  if (["assembled", "delivering", "done", "cancelled"].includes(order.status)) {
+    const { text: statusText, buttons: statusButtons } = buildStatusMessage(
+      order.id,
+      order.status,
+      order.items as { productId: string; quantity: number }[],
+      order.estimatedTotal,
+      order.finalWeight,
+      order.finalTotal
+    );
+    await sendTelegramMessage(chatId, connectedText);
+    await sendTelegramMessage(chatId, statusText, statusButtons);
+  } else {
+    const { buttons } = buildConnectedMessage(order.id, order.items as { productId: string; quantity: number }[], order.estimatedTotal, order.status);
+    await sendTelegramMessage(chatId, connectedText, buttons);
+  }
 
   return Response.json({ ok: true });
 }
