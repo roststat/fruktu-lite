@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   products,
@@ -29,20 +29,13 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
 
   const [clearanceOn, setClearanceOn] = useState(false);
   const [discountOn, setDiscountOn] = useState(false);
-  const skipFilterResetRef = useRef(false);
-  const prevCategoryRef = useRef(activeCategory);
 
-  // Reset filters when category changes
-  useEffect(() => {
-    if (prevCategoryRef.current === activeCategory) return;
-    prevCategoryRef.current = activeCategory;
-    if (skipFilterResetRef.current) {
-      skipFilterResetRef.current = false;
-    } else {
-      setClearanceOn(false);
-      setDiscountOn(false);
-    }
-  }, [activeCategory]);
+  const handleCategorySelect = (id: string) => {
+    setClearanceOn(false);
+    setDiscountOn(false);
+    if (embedded) setEmbeddedCategory(id);
+    else router.push(`/catalog?category=${id}`);
+  };
 
   const isDefaultCategory = !activeCategory || activeCategory === ALL_CATEGORY_ID;
   const activeCategoryObj = activeCategory ? getCategoryById(activeCategory) : null;
@@ -64,15 +57,13 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
   const clearSearch = () => router.push("/catalog");
 
   const showAllClearance = () => {
-    skipFilterResetRef.current = true;
-    if (embedded) { setEmbeddedCategory(ALL_CATEGORY_ID); return; }
-    router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
+    if (embedded) setEmbeddedCategory(ALL_CATEGORY_ID);
+    else router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
   };
 
   const showAllDiscount = () => {
-    skipFilterResetRef.current = true;
-    if (embedded) { setEmbeddedCategory(ALL_CATEGORY_ID); return; }
-    router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
+    if (embedded) setEmbeddedCategory(ALL_CATEGORY_ID);
+    else router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
   };
 
   return (
@@ -107,11 +98,7 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
                   </span>
                 </span>
               }
-              onSelectCategory={
-                embedded
-                  ? (id) => { setClearanceOn(false); setDiscountOn(false); setEmbeddedCategory(id); }
-                  : undefined
-              }
+              onSelectCategory={handleCategorySelect}
             />
           </div>
           {(searchQuery || (activeCategory && activeCategory !== ALL_CATEGORY_ID)) && (
