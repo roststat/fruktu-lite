@@ -168,7 +168,7 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {filtered.map((product) =>
           showClearanceCards ? (
             <ClearanceCard key={product.id} product={product} />
