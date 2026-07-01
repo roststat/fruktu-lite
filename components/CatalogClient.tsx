@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   products,
+  categories,
   getCategoryById,
   productMatchesCategory,
   textMatchesQuery,
@@ -168,15 +169,35 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-        {filtered.map((product) =>
-          showClearanceCards ? (
-            <ClearanceCard key={product.id} product={product} />
-          ) : (
-            <ProductCard key={product.id} product={product} />
-          )
-        )}
-      </div>
+      {isDefaultCategory && !searchQuery && !clearanceOn && !discountOn ? (
+        categories.map((cat) => {
+          const catProducts = filtered.filter((p) => productMatchesCategory(p, cat.id));
+          if (catProducts.length === 0) return null;
+          return (
+            <div key={cat.id} className="mb-8">
+              <h2 className="mb-3 flex items-center gap-2 text-lg font-extrabold text-foreground">
+                <span>{cat.icon}</span>
+                <span>{cat.name}</span>
+              </h2>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                {catProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {filtered.map((product) =>
+            showClearanceCards ? (
+              <ClearanceCard key={product.id} product={product} />
+            ) : (
+              <ProductCard key={product.id} product={product} />
+            )
+          )}
+        </div>
+      )}
 
       {filtered.length === 0 && (
         <p className="py-12 text-center text-muted">
