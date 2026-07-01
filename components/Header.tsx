@@ -10,8 +10,10 @@ import LogoIcon from "./LogoIcon";
 
 export type ActiveOrderInfo = { id: string; status: string };
 
+const CLOSED_STATUSES = ["done", "cancelled", "assembled", "delivering"];
+
 export function saveActiveOrder(info: ActiveOrderInfo | null) {
-  if (info && !["done", "cancelled"].includes(info.status)) {
+  if (info && !CLOSED_STATUSES.includes(info.status)) {
     localStorage.setItem("fruktu_active_order", JSON.stringify(info));
   } else {
     localStorage.removeItem("fruktu_active_order");

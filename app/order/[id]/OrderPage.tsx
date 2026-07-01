@@ -272,7 +272,7 @@ export default function OrderPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          {["done", "cancelled"].includes(order.status) ? (
+          {["done", "cancelled", "assembled", "delivering"].includes(order.status) ? (
             <Link href="/catalog" className="mb-2 inline-block text-sm text-muted hover:text-primary-dark">
               ← В каталог
             </Link>
