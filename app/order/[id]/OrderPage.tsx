@@ -342,18 +342,20 @@ export default function OrderPage() {
         )
       )}
 
-      {order.status === "assembled" && order.finalTotal && (
+      {order.status === "assembled" && (
         <div className="mb-6 rounded-[16px] border border-emerald-200 bg-emerald-50 p-4">
           <p className="text-sm font-bold text-emerald-700">📦 Заказ собран и готов к оплате!</p>
           <div className="mt-2 flex flex-wrap gap-4 text-sm text-emerald-700">
-            <span>⚖️ Точный вес: <b>{Math.round(Number(order.finalWeight) * 10) / 10} кг</b></span>
-            <span>💰 Итого: <b>{Math.round(Number(order.finalTotal))} ₽</b></span>
+            {order.finalWeight && (
+              <span>⚖️ Точный вес: <b>{Math.round(Number(order.finalWeight) * 10) / 10} кг</b></span>
+            )}
+            <span>💰 Итоговая сумма: <b>{Math.round(Number(order.finalTotal ?? order.estimatedTotal))} ₽</b></span>
           </div>
           <Link
             href={`/order/${order.id}/pay`}
             className="mt-3 inline-block rounded-[10px] bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white"
           >
-            💳 Оплатить {Math.round(Number(order.finalTotal))} ₽
+            💳 Оплатить {Math.round(Number(order.finalTotal ?? order.estimatedTotal))} ₽
           </Link>
         </div>
       )}
