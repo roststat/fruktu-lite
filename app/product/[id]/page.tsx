@@ -41,7 +41,7 @@ export default async function ProductPage({
               alt={product.name}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
+              className="object-contain p-4"
               priority
             />
           ) : (

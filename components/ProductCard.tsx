@@ -28,7 +28,7 @@ export default function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover"
+            className="object-contain p-2"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-7xl sm:text-8xl">
