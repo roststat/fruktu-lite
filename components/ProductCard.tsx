@@ -21,14 +21,13 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="flex flex-col">
-      {/* Фото */}
       <Link href={`/product/${product.id}`} className="relative block aspect-square rounded-[16px] bg-white overflow-hidden">
         {product.image ? (
           <Image
             src={product.image}
             alt={product.name}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-contain p-2"
           />
         ) : (
@@ -37,47 +36,36 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         )}
         {product.discount && (
-          <span className="absolute left-2 top-2 rounded-[20px] bg-tomato px-2 py-0.5 text-[11px] font-bold text-white">
-            −{product.discount.percent}%
+          <span className="absolute left-2 top-2 rounded-[20px] bg-tomato px-2.5 py-1 text-[11px] font-bold text-white">
+            🔥 Скидка −{product.discount.percent}%
           </span>
         )}
-      </Link>
-
-      {/* Описание */}
-      <div className="flex flex-1 flex-col px-1 pt-2">
-        {/* Цена */}
-        <div className="mb-1 flex items-baseline gap-1.5">
+        <span className="absolute bottom-2 left-2 rounded-[8px] bg-white px-2.5 py-1 text-sm font-bold text-foreground shadow-sm">
           {product.discount ? (
             <>
-              <span className="text-base font-extrabold text-tomato">
-                {product.discount.price} ₽
-              </span>
-              <span className="text-xs text-muted line-through">
-                {product.price} ₽
-              </span>
+              <span className="text-tomato">{product.discount.price} ₽</span>
+              <span className="ml-1 text-xs text-muted line-through">{product.price} ₽</span>
             </>
           ) : (
-            <span className="text-base font-extrabold text-foreground">
-              {product.price} ₽
-            </span>
+            <>{product.price} ₽</>
           )}
-          <span className="text-xs text-muted">/ {product.unit}</span>
-        </div>
+          /{product.unit}
+        </span>
+      </Link>
 
-        {/* Название */}
+      <div className="flex flex-1 flex-col p-3 pt-2">
         <Link
           href={`/product/${product.id}`}
-          className="line-clamp-2 text-xs text-muted leading-snug hover:text-foreground"
+          className="line-clamp-2 text-sm font-semibold leading-snug hover:text-primary-dark"
         >
           {product.name}
         </Link>
 
-        {/* Кнопка */}
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-3">
           {quantity === 0 ? (
             <button
               onClick={() => addItem(product.id, getDefaultQuantity(product))}
-              className="w-full rounded-[10px] bg-primary py-2 text-sm font-semibold text-white"
+              className="w-full rounded-[10px] bg-primary py-2.5 text-sm font-semibold text-white"
             >
               В список
             </button>
