@@ -3,116 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { type Order } from "@/lib/db/schema";
-import { getCartProductById, formatQuantity, isWeightProduct, products as allProducts, textMatchesQuery } from "@/data/catalog";
+import { getCartProductById, formatQuantity, isWeightProduct } from "@/data/catalog";
+import AdminCatalogPicker from "./AdminCatalogPicker";
 
-function AddProductPanel({
-  existingItems,
-  onAdd,
-}: {
-  existingItems: OrderItem[];
-  onAdd: (productId: string, qty: number) => Promise<void>;
-}) {
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<string | null>(null);
-  const [qty, setQty] = useState(1);
-  const [adding, setAdding] = useState(false);
-
-  const results = query.trim().length >= 1
-    ? allProducts.filter((p) => textMatchesQuery(p.name, query.trim().toLowerCase())).slice(0, 8)
-    : [];
-
-  const selectedProduct = selected ? allProducts.find((p) => p.id === selected) : null;
-  const isKg = selectedProduct ? isWeightProduct(selectedProduct) : false;
-
-  const handleSelect = (id: string) => {
-    setSelected(id);
-    const existing = existingItems.find((i) => i.productId === id);
-    const prod = allProducts.find((p) => p.id === id);
-    setQty(existing ? existing.quantity : (prod && isWeightProduct(prod) ? 0.5 : 1));
-    setQuery("");
-  };
-
-  const handleAdd = async () => {
-    if (!selected || qty <= 0) return;
-    setAdding(true);
-    await onAdd(selected, qty);
-    setSelected(null);
-    setQty(1);
-    setAdding(false);
-  };
-
-  return (
-    <div className="mt-3 rounded-[12px] border border-primary/20 bg-primary/5 p-3">
-      <p className="mb-2 text-xs font-bold text-primary-dark">➕ Добавить товар к заказу</p>
-
-      {!selected ? (
-        <div className="relative">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск товара из каталога…"
-            className="w-full rounded-[10px] border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-primary"
-          />
-          {results.length > 0 && (
-            <div className="absolute left-0 top-full z-20 mt-1 w-full rounded-[10px] border border-black/5 bg-white shadow-lg">
-              {results.map((p) => {
-                const alreadyIn = existingItems.some((i) => i.productId === p.id);
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => handleSelect(p.id)}
-                    className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-primary/5"
-                  >
-                    <span>{p.icon} {p.name}</span>
-                    <span className="ml-2 shrink-0 text-xs text-muted">
-                      {p.price} ₽/{p.unit}{alreadyIn ? " · уже в заказе" : ""}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-wrap items-end gap-2">
-          <div>
-            <p className="mb-1 text-xs text-muted">Товар</p>
-            <div className="flex items-center gap-2 rounded-[10px] border border-black/10 bg-white px-3 py-2 text-sm">
-              <span>{selectedProduct?.icon} {selectedProduct?.name}</span>
-              <span className="text-muted">· {selectedProduct?.price} ₽/{selectedProduct?.unit}</span>
-              <button onClick={() => setSelected(null)} className="ml-1 text-muted hover:text-foreground">✕</button>
-            </div>
-          </div>
-          <div>
-            <p className="mb-1 text-xs text-muted">{isKg ? "Вес (кг)" : "Количество"}</p>
-            <input
-              type="number"
-              step={isKg ? "0.1" : "1"}
-              min={isKg ? "0.1" : "1"}
-              value={qty}
-              onChange={(e) => setQty(Number(e.target.value))}
-              className="w-24 rounded-[10px] border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-primary"
-            />
-          </div>
-          <div>
-            <p className="mb-1 text-xs text-muted">Сумма</p>
-            <p className="rounded-[10px] border border-transparent px-3 py-2 text-sm font-bold text-primary-dark">
-              {Math.round((selectedProduct?.price ?? 0) * qty)} ₽
-            </p>
-          </div>
-          <button
-            onClick={handleAdd}
-            disabled={adding || qty <= 0}
-            className="rounded-[10px] bg-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-40"
-          >
-            {adding ? "…" : "Добавить"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   new:        { label: "Новый",        color: "bg-blue-100 text-blue-700" },
@@ -377,9 +270,10 @@ function OrderRow({ order, onUpdate }: { order: Order; onUpdate: (o: Order) => v
             {showAddProduct ? "Скрыть ↑" : "➕ Добавить товар к заказу"}
           </button>
           {showAddProduct && (
-            <AddProductPanel
+            <AdminCatalogPicker
               existingItems={(order.items as OrderItem[]) ?? []}
               onAdd={addProduct}
+              onClose={() => setShowAddProduct(false)}
             />
           )}
         </>
