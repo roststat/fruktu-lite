@@ -246,6 +246,48 @@ export default function OrderPage() {
         )}
       </div>
 
+      {/* Telegram CTA — prominent, shown for all active orders */}
+      {!["done", "cancelled"].includes(order.status) && (
+        order.messengerPlatform === "telegram" && order.messengerChatId ? (
+          <div className="mb-6 flex items-center gap-3 rounded-[16px] border border-[#229ED9]/30 bg-[#229ED9]/8 p-4">
+            <span className="text-2xl">✅</span>
+            <div>
+              <p className="font-bold text-[#1a7aab]">Telegram подключён</p>
+              <p className="text-sm text-[#1a7aab]/80">Вы получите уведомление при любом изменении заказа.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-6 rounded-[16px] border-2 border-[#229ED9] bg-[#229ED9]/5 p-4">
+            <div className="mb-3 flex items-start gap-3">
+              <span className="mt-0.5 text-2xl">✈️</span>
+              <div>
+                <p className="font-extrabold text-foreground">Подключите Telegram — не закрывайте заказ!</p>
+                <p className="mt-1 text-sm text-muted">
+                  Здесь появится окончательная стоимость и кнопка оплаты после сборки.
+                  Но если закроете страницу — подключите Telegram, чтобы не пропустить уведомление.
+                </p>
+              </div>
+            </div>
+            <ul className="mb-4 flex flex-col gap-1 pl-9 text-sm text-muted">
+              <li>🔔 Статус заказа в реальном времени</li>
+              <li>💰 Окончательная стоимость после сборки</li>
+              <li>📦 Уведомление когда заказ едет к вам</li>
+            </ul>
+            <a
+              href={`https://t.me/${TELEGRAM_BOT_USERNAME}?start=order_${order.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#229ED9] py-3 text-base font-bold text-white shadow-sm"
+            >
+              ✈️ Подключить Telegram и следить за заказом
+            </a>
+            <p className="mt-2 text-center text-xs text-muted">
+              Или оставайтесь на этой странице — она обновляется автоматически каждые 15 секунд
+            </p>
+          </div>
+        )
+      )}
+
       {order.status === "assembled" && order.finalTotal && (
         <div className="mb-6 rounded-[16px] border border-emerald-200 bg-emerald-50 p-4">
           <p className="text-sm font-bold text-emerald-700">📦 Заказ собран и готов к оплате!</p>
@@ -446,31 +488,6 @@ export default function OrderPage() {
           </p>
         )}
         <p className="mt-1 text-xs text-muted">Точная сумма уточняется после сборки</p>
-      </section>
-
-      {/* Messenger notifications */}
-      <section className="mb-6 rounded-[16px] border border-black/5 bg-white p-4">
-        <h2 className="mb-1 font-bold">Уведомления о заказе</h2>
-        {order.messengerPlatform === "telegram" && order.messengerChatId ? (
-          <p className="flex items-center gap-2 text-sm text-primary-dark">
-            <span aria-hidden>✅</span>
-            Подключены уведомления в Telegram
-          </p>
-        ) : (
-          <>
-            <p className="mb-3 text-sm text-muted">
-              Подключите Telegram — пришлём сообщение, когда заказ подтвердят, соберут и привезут.
-            </p>
-            <a
-              href={`https://t.me/${TELEGRAM_BOT_USERNAME}?start=order_${order.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-[10px] bg-[#229ED9] px-4 py-2.5 text-sm font-bold text-white"
-            >
-              ✈️ Подключить Telegram
-            </a>
-          </>
-        )}
       </section>
 
       {/* Actions */}
