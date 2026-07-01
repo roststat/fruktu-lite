@@ -17,18 +17,32 @@ import CategoryMenu from "./CategoryMenu";
 export default function CatalogClient({ embedded = false }: { embedded?: boolean } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialCategory = embedded ? null : searchParams.get("category");
+  const urlCategory = embedded ? null : searchParams.get("category");
   const searchQuery = embedded ? "" : (searchParams.get("q")?.trim().toLowerCase() ?? "");
-  const [activeCategory, setActiveCategory] = useState<string | null>(
-    initialCategory
-  );
+
+  // Embedded mode uses local state; non-embedded reads directly from URL (no sync lag)
+  const [embeddedCategory, setEmbeddedCategory] = useState<string | null>(null);
+  const activeCategory = embedded ? embeddedCategory : urlCategory;
+
   const [clearanceOn, setClearanceOn] = useState(false);
   const [discountOn, setDiscountOn] = useState(false);
+  const skipFilterResetRef = useRef(false);
+  const prevCategoryRef = useRef(activeCategory);
+
+  // Reset filters when category changes
+  useEffect(() => {
+    if (prevCategoryRef.current === activeCategory) return;
+    prevCategoryRef.current = activeCategory;
+    if (skipFilterResetRef.current) {
+      skipFilterResetRef.current = false;
+    } else {
+      setClearanceOn(false);
+      setDiscountOn(false);
+    }
+  }, [activeCategory]);
 
   const isDefaultCategory = !activeCategory || activeCategory === ALL_CATEGORY_ID;
-  const activeCategoryObj = activeCategory
-    ? getCategoryById(activeCategory)
-    : null;
+  const activeCategoryObj = activeCategory ? getCategoryById(activeCategory) : null;
 
   const base = searchQuery
     ? products.filter((p) => textMatchesQuery(p.name, searchQuery))
@@ -46,38 +60,17 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
 
   const clearSearch = () => router.push("/catalog");
 
-  const skipFilterResetRef = useRef(false);
-
   const showAllClearance = () => {
-    if (embedded) {
-      setActiveCategory(ALL_CATEGORY_ID);
-      return;
-    }
     skipFilterResetRef.current = true;
-    setActiveCategory(ALL_CATEGORY_ID);
+    if (embedded) { setEmbeddedCategory(ALL_CATEGORY_ID); return; }
     router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
   };
 
   const showAllDiscount = () => {
-    if (embedded) {
-      setActiveCategory(ALL_CATEGORY_ID);
-      return;
-    }
     skipFilterResetRef.current = true;
-    setActiveCategory(ALL_CATEGORY_ID);
+    if (embedded) { setEmbeddedCategory(ALL_CATEGORY_ID); return; }
     router.push(`/catalog?category=${ALL_CATEGORY_ID}`);
   };
-
-  useEffect(() => {
-    if (embedded) return;
-    setActiveCategory(initialCategory);
-    if (skipFilterResetRef.current) {
-      skipFilterResetRef.current = false;
-    } else {
-      setClearanceOn(false);
-      setDiscountOn(false);
-    }
-  }, [initialCategory]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
@@ -103,7 +96,9 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
                 </span>
               }
               onSelectCategory={
-                embedded ? (id) => { setActiveCategory(id); setClearanceOn(false); setDiscountOn(false); } : undefined
+                embedded
+                  ? (id) => { setClearanceOn(false); setDiscountOn(false); setEmbeddedCategory(id); }
+                  : undefined
               }
             />
           </div>
