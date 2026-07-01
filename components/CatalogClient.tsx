@@ -109,7 +109,7 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
           </div>
           {(searchQuery || (activeCategory && activeCategory !== ALL_CATEGORY_ID)) && (
             <button
-              onClick={searchQuery ? clearSearch : () => { setActiveCategory(null); setClearanceOn(false); setDiscountOn(false); }}
+              onClick={searchQuery ? clearSearch : () => router.push("/catalog")}
               className="shrink-0 rounded-[10px] bg-primary/10 px-3 py-2 text-sm font-bold text-primary-dark"
             >
               Все ✕
