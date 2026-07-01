@@ -23,14 +23,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const allowed = [
     "items", "itemsCount", "estimatedTotal",
     "phone", "address", "comment", "status",
-    "finalWeight", "finalTotal", "paymentStatus",
+    "finalWeight", "finalTotal", "factItems", "paymentStatus",
   ] as const;
 
   const patch: Record<string, unknown> = { updatedAt: new Date() };
   for (const key of allowed) {
     if (!(key in body)) continue;
     if (key === "estimatedTotal" || key === "finalTotal" || key === "finalWeight") {
-      patch[key] = body[key] !== null && body[key] !== undefined ? String(body[key]) : null;
+      patch[key] = body[key] != null ? String(body[key]) : null;
     } else {
       patch[key] = body[key];
     }

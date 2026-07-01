@@ -7,6 +7,7 @@ export const orders = pgTable("fruktu_lite_orders", {
   estimatedTotal: numeric("estimated_total", { precision: 10, scale: 2 }).notNull(),
   finalWeight: numeric("final_weight", { precision: 8, scale: 3 }),
   finalTotal: numeric("final_total", { precision: 10, scale: 2 }),
+  factItems: jsonb("fact_items"),
   paymentStatus: text("payment_status").default("pending"),
   phone: text("phone").notNull(),
   address: text("address").notNull(),
