@@ -18,11 +18,13 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
   const router = useRouter();
   const searchParams = useSearchParams();
   const urlCategory = embedded ? null : searchParams.get("category");
-  const searchQuery = embedded ? "" : (searchParams.get("q")?.trim().toLowerCase() ?? "");
+  const urlSearchQuery = embedded ? "" : (searchParams.get("q")?.trim().toLowerCase() ?? "");
 
   // Embedded mode uses local state; non-embedded reads directly from URL (no sync lag)
   const [embeddedCategory, setEmbeddedCategory] = useState<string | null>(null);
+  const [embeddedSearch, setEmbeddedSearch] = useState("");
   const activeCategory = embedded ? embeddedCategory : urlCategory;
+  const searchQuery = embedded ? embeddedSearch.trim().toLowerCase() : urlSearchQuery;
 
   const [clearanceOn, setClearanceOn] = useState(false);
   const [discountOn, setDiscountOn] = useState(false);
@@ -78,8 +80,17 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
 
       <div
         className="sticky z-30 -mx-4 mb-4 border-b border-black/5 bg-background/95 px-4 py-2 backdrop-blur"
-        style={{ top: "var(--header-height, 0px)" }}
+        style={{ top: embedded ? "0px" : "var(--header-height, 0px)" }}
       >
+        {embedded && (
+          <input
+            type="search"
+            value={embeddedSearch}
+            onChange={(e) => setEmbeddedSearch(e.target.value)}
+            placeholder="Поиск товара…"
+            className="mb-2 w-full rounded-[10px] border border-black/10 bg-white px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+        )}
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
             <CategoryMenu
@@ -104,7 +115,11 @@ export default function CatalogClient({ embedded = false }: { embedded?: boolean
           </div>
           {(searchQuery || (activeCategory && activeCategory !== ALL_CATEGORY_ID)) && (
             <button
-              onClick={searchQuery ? clearSearch : () => router.push("/catalog")}
+              onClick={() => {
+                if (embedded) { setEmbeddedSearch(""); setEmbeddedCategory(null); setClearanceOn(false); setDiscountOn(false); }
+                else if (searchQuery) clearSearch();
+                else router.push("/catalog");
+              }}
               className="shrink-0 rounded-[10px] bg-primary/10 px-3 py-2 text-sm font-bold text-primary-dark"
             >
               Все ✕
